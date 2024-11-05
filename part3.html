@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Part 3: Further Interpretation of Vital Signs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+
+    <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDUqolrnw7CQ-_bPWx0bbSPBEK4MNgkgmo",
+            authDomain: "datacollection-9f8f6.firebaseapp.com",
+            projectId: "datacollection-9f8f6",
+            storageBucket: "datacollection-9f8f6.appspot.com",
+            messagingSenderId: "171849859334",
+            appId: "1:171849859334:web:c0c40fd8ca74a9e10e9e87",
+            measurementId: "G-F2WDNKDP5R"
+          };
+          
+          // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+    </script>
+</head>
+<body>
+    <div class="navbar">
+        <h1>Vital Signs Survey</h1>
+        <ul>
+            <li><a href="part1.html">Part 1</a></li>
+            <li><a href="part2.html">Part 2</a></li>
+            <li><a href="part3.html">Part 3</a></li>
+        </ul>
+    </div>
+
+    <div class="container">
+        <div class="progress-bar">
+            <h3 style="padding: 1%;">100%</h3>
+            <div class="progress-bar-fill" style="width: 100%;"></div>
+        </div>
+
+        <h1>Part 3: Further Interpretation of Vital Signs</h1>
+
+        <h2>Participant Instructions / Task:</h2>
+        <p>For each vital sign out of heart rate, systolic blood pressure, respiratory rate, temperature, oxygen saturations, and inspired oxygen requirement, participants will be asked:</p>
+        <ul>
+            <li>When interpreting <em>(insert vital sign)</em>, how important is it to take account of:</li>
+            <ul>
+            <li>What is normal for that individual patient.</li>
+            <li>Whether the general trend is worsening or improving.</li>
+            <li>Abnormal values that have occurred within the past 24 hours.</li>
+            </ul>
+        </ul>
+
+        <div id="part3Container"></div>
+
+        <div class="navigation-buttons">
+            <a href="part2.html">
+                <button>Back</button>
+            </a>
+            <button id="submitButton">Submit</button>
+        </div>
+
+        <!-- Include JS file -->
+        <script src="script3.js"></script>
+    </div>
+</body>
+</html>
