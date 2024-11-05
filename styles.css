@@ -75,12 +75,22 @@ a {
     border-radius: 6px;
     overflow: hidden;
     margin: 20px 0;
+    position: relative;
 }
 .progress-bar-fill {
     height: 20px;
     background-color: #3498db;
-    width: 0%;
+    width: 33%; /* Adjusted to match the progress percentage */
     transition: width 0.3s;
+}
+.progress-bar h3 {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    color: #fff;
+    font-size: 1em;
 }
 
 /* Vital Sign Styles */
@@ -102,7 +112,10 @@ a {
 .scale-container {
     position: relative;
     margin: 60px 0 40px 0;
-    height: 160px; /* Increased to accommodate multiple arrow levels */
+    height: 180px; /* Adjusted for new thumb sizes */
+    width: 100%;
+    max-width: 800px;
+    margin: 60px auto 40px auto;
 }
 .track {
     position: relative;
@@ -112,90 +125,13 @@ a {
     border-radius: 6px;
     margin: 30px 0;
     cursor: pointer;
+    overflow: hidden;
 }
 .range {
     position: absolute;
     height: 12px;
     border-radius: 6px;
     top: 0;
-}
-.thumb {
-    position: absolute;
-    width: 0;
-    height: 0;
-    border-left: 12px solid transparent;
-    border-right: 12px solid transparent;
-    transform: translateX(-50%);
-    cursor: pointer;
-    z-index: 3; /* Ensure thumbs are above other elements */
-}
-.thumb-severe {
-    border-top: 18px solid #e74c3c; /* Red */
-    top: -24px;
-}
-.thumb-moderate {
-    border-top: 18px solid #e67e22; /* Orange */
-    top: -42px;
-}
-.thumb-mild {
-    border-top: 18px solid #f1c40f; /* Yellow */
-    top: -60px;
-}
-.thumb-label {
-    position: absolute;
-    transform: translateX(-50%);
-    font-size: 0.9em;
-    white-space: nowrap;
-    background: #fff;
-    padding: 5px 8px;
-    border-radius: 4px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    z-index: 4; /* Ensure labels are above thumbs */
-}
-.thumb-label-severe {
-    top: -70px;
-}
-.thumb-label-moderate {
-    top: -88px;
-}
-.thumb-label-mild {
-    top: -106px;
-}
-/* Tick Marks and Labels */
-.labels {
-    position: absolute;
-    width: 100%;
-    top: 50px;
-    font-size: 0.9em;
-    pointer-events: none;
-}
-.labels span {
-    position: absolute;
-    transform: translateX(-50%);
-    white-space: nowrap;
-    color: #555;
-}
-.tick-marks {
-    position: absolute;
-    width: 100%;
-    top: 20px;
-    height: 16px;
-    overflow: visible;
-}
-/* Tick Marks and Labels */
-.tick {
-    position: absolute;
-    width: 2px;
-    background-color: #444;
-    border-radius: 1px;
-    transform: translateX(-50%);
-}
-
-.labels span {
-    position: absolute;
-    transform: translateX(-50%);
-    white-space: nowrap;
-    color: #555;
 }
 
 /* Thumb Styles */
@@ -205,39 +141,53 @@ a {
     height: 0;
     border-left: 12px solid transparent;
     border-right: 12px solid transparent;
-    transform: translateX(-50%);
+    border-top: 24px solid #fff; /* Base color for the arrow */
+    transform: translate(-50%, -50%);
     cursor: pointer;
-    z-index: 3;
+    z-index: 3; /* Ensure thumbs are above other elements */
+    transition: border-top-color 0.3s;
 }
 
-/* Thumb Labels */
-.thumb-label {
+.thumb:hover {
+    border-top-color: #f0f0f0;
+}
+
+/* Thumb Levels */
+.thumb-severe {
+    border-top-color: #e74c3c;
+    top: -36px;
+}
+.thumb-moderate {
+    border-top-color: #e67e22;
+    top: -54px;
+}
+.thumb-mild {
+    border-top-color: #f1c40f;
+    top: -72px;
+}
+
+
+/* Tick Marks */
+.tick-container {
+    position: absolute;
+    width: 100%;
+    height: 20px;
+    bottom: -20px;
+}
+.tick {
+    position: absolute;
+    width: 2px;
+    height: 10px;
+    background: #444;
+    border-radius: 1px;
+    transform: translateX(-50%);
+}
+.tick-label {
     position: absolute;
     transform: translateX(-50%);
-    font-size: 0.9em;
-    white-space: nowrap;
-    background: #fff;
-    padding: 5px 8px;
-    border-radius: 4px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    z-index: 4;
-}
-
-/* Ensure Parent Containers are Positioned Correctly */
-.scale-container {
-    position: relative;
-}
-
-.track {
-    position: relative;
-}
-
-
-.tick.major {
-    height: 16px;
-}
-.tick.minor {
-    height: 10px;
+    font-size: 0.8em;
+    color: #444;
+    top: 12px;
 }
 
 /* Concern Levels */
@@ -270,6 +220,7 @@ a {
     justify-content: space-between;
     margin: 40px 0;
 }
+.navigation-buttons a button,
 .navigation-buttons button {
     padding: 15px 30px;
     font-size: 1em;
@@ -280,6 +231,7 @@ a {
     cursor: pointer;
     transition: background-color 0.3s;
 }
+.navigation-buttons a button:hover,
 .navigation-buttons button:hover {
     background-color: #2980b9;
 }
@@ -300,6 +252,7 @@ a {
 #submitButton:hover {
     background-color: #2980b9;
 }
+
 /* Table Styles */
 .threshold-table, .combination-table {
     width: 100%;
@@ -316,6 +269,7 @@ a {
     background-color: #f5f5f5;
     font-weight: 700;
 }
+
 /* Part 2 Styles */
 #part2Container {
     margin-top: 80px;
@@ -475,15 +429,6 @@ input[type="range"]::-moz-range-thumb:hover {
     .vital-sign, .question-set, .combination {
         padding: 30px;
     }
-    .thumb-label {
-        top: -70px;
-    }
-    .concern-levels {
-        flex-direction: column;
-    }
-    .concern-level {
-        margin: 5px 0;
-    }
     .navbar h1 {
         font-size: 1.2em;
     }
@@ -495,3 +440,60 @@ input[type="range"]::-moz-range-thumb:hover {
     }
 }
 
+/* Additional Styles */
+.vital-sign {
+    margin: 20px;
+    padding: 20px;
+    border: 1px solid #ccc;
+}
+
+.track {
+    height: 10px;
+    background: #eee;
+    margin: 40px 0;
+    position: relative;
+}
+
+.range {
+    height: 100%;
+}
+
+.tick.major {
+    height: 16px;
+}
+.tick.minor {
+    height: 10px;
+}
+
+
+
+.thumb-label-severe { color: #e74c3c; }
+.thumb-label-moderate { color: #e67e22; }
+.thumb-label-mild { color: #f1c40f; }
+
+.scale-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Ensure Parent Containers are Positioned Correctly */
+.scale-container {
+    position: relative;
+}
+.track {
+    position: relative;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+    .thumb-label {
+        top: -70px;
+    }
+    .concern-levels {
+        flex-direction: column;
+    }
+    .concern-level {
+        margin: 5px 0;
+    }
+}
