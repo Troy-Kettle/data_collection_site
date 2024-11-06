@@ -112,7 +112,7 @@ a {
 .scale-container {
     position: relative;
     margin: 60px 0 40px 0;
-    height: 180px; /* Adjusted for new thumb sizes */
+    height: 180px;
     width: 100%;
     max-width: 800px;
     margin: 60px auto 40px auto;
@@ -141,13 +141,12 @@ a {
     height: 0;
     border-left: 12px solid transparent;
     border-right: 12px solid transparent;
-    border-top: 24px solid #fff; /* Base color for the arrow */
+    border-top: 24px solid #fff;
     transform: translate(-50%, -50%);
     cursor: pointer;
-    z-index: 3; /* Ensure thumbs are above other elements */
+    z-index: 3;
     transition: border-top-color 0.3s;
 }
-
 .thumb:hover {
     border-top-color: #f0f0f0;
 }
@@ -166,13 +165,12 @@ a {
     top: -72px;
 }
 
-
 /* Tick Marks */
 .tick-container {
     position: absolute;
     width: 100%;
-    height: 20px;
-    bottom: -20px;
+    height: 40px;
+    bottom: -40px;
 }
 .tick {
     position: absolute;
@@ -182,12 +180,48 @@ a {
     border-radius: 1px;
     transform: translateX(-50%);
 }
+.tick.major {
+    height: 16px;
+    background: #000;
+}
 .tick-label {
     position: absolute;
     transform: translateX(-50%);
     font-size: 0.8em;
     color: #444;
     top: 12px;
+}
+.tick-label.major {
+    font-weight: bold;
+    color: #000;
+}
+
+/* Tick Generation */
+@keyframes generateTicks {
+    0%, 100% {
+        opacity: 1;
+    }
+}
+.tick-container .tick {
+    animation: generateTicks 0.5s ease-in-out;
+}
+
+/* Generating Ticks Dynamically with Ranges */
+.tick-container::before {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+.tick-container .tick:nth-child(5n) {
+    height: 20px;
+    background-color: #000;
+}
+.tick-container .tick-label {
+    font-weight: 600;
+}
+.tick-container .tick:nth-child(5n) + .tick-label {
+    font-weight: bold;
 }
 
 /* Concern Levels */
@@ -290,7 +324,7 @@ a {
 .slider-container {
     margin-top: 40px;
     position: relative;
-    padding-bottom: 30px; /* Space for the value below the slider */
+    padding-bottom: 30px;
 }
 
 .slider-container label {
@@ -311,7 +345,7 @@ input[type="range"] {
     outline: none;
     opacity: 0.7;
     transition: opacity 0.2s;
-    margin-bottom: 20px; /* Increased space between slider and value */
+    margin-bottom: 20px;
 }
 
 input[type="range"]:hover {
@@ -457,15 +491,6 @@ input[type="range"]::-moz-range-thumb:hover {
 .range {
     height: 100%;
 }
-
-.tick.major {
-    height: 16px;
-}
-.tick.minor {
-    height: 10px;
-}
-
-
 
 .thumb-label-severe { color: #e74c3c; }
 .thumb-label-moderate { color: #e67e22; }

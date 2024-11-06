@@ -1,7 +1,5 @@
-// script1.js
-
 document.addEventListener('DOMContentLoaded', () => {
-    // Vital Signs Data
+    // Vital Signs Data with unique names for Inspired Oxygen
     const vitalSignsData = [
         {
             name: "Heart Rate",
@@ -50,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
             reverseScale: true
         },
         {
-            name: "Inspired Oxygen -",
+            name: "Inspired Oxygen (L/min)",
             unit: "L/min",
             min: 0,
             max: 15,
@@ -59,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
             hasBothDirections: false
         },
         {
-            name: "Inspired Oxygen -",
+            name: "Inspired Oxygen (%)",
             unit: "%",
             min: 20,
             max: 100,
@@ -290,10 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     { label: 'Low - severe concern', class: 'severe-concern', color: '#e74c3c' },
                     { label: 'Low - moderate concern', class: 'moderate-concern', color: '#e67e22' },
                     { label: 'Low - mild concern', class: 'mild-concern', color: '#f1c40f' },
-                    { label: 'No concern', class: 'no-concern', color: '#2ecc71' },
-                    { label: 'High - mild concern', class: 'mild-concern', color: '#f1c40f' },
-                    { label: 'High - moderate concern', class: 'moderate-concern', color: '#e67e22' },
-                    { label: 'High - severe concern', class: 'severe-concern', color: '#e74c3c' }
+                    { label: 'No concern', class: 'no-concern', color: '#2ecc71' }
                 ];
             }
             else if (vitalSign.name.startsWith("Inspired Oxygen")) {
@@ -335,23 +330,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         return { thumbClass: 'thumb-moderate', thumbLabelClass: 'thumb-label-moderate' };
                     case 3:
                         return { thumbClass: 'thumb-mild', thumbLabelClass: 'thumb-label-mild' };
-                    case 4:
-                        return { thumbClass: 'thumb-mild', thumbLabelClass: 'thumb-label-mild' };
-                    case 5:
-                        return { thumbClass: 'thumb-moderate', thumbLabelClass: 'thumb-label-moderate' };
-                    case 6:
-                        return { thumbClass: 'thumb-severe', thumbLabelClass: 'thumb-label-severe' };
                     default:
                         return { thumbClass: '', thumbLabelClass: '' };
                 }
             } else if (vitalSign.name.startsWith("Inspired Oxygen")) {
                 switch (index) {
-                    case 3:
-                        return { thumbClass: 'thumb-severe', thumbLabelClass: 'thumb-label-severe' };
-                    case 2:
-                        return { thumbClass: 'thumb-moderate', thumbLabelClass: 'thumb-label-moderate' };
                     case 1:
                         return { thumbClass: 'thumb-mild', thumbLabelClass: 'thumb-label-mild' };
+                    case 2:
+                        return { thumbClass: 'thumb-moderate', thumbLabelClass: 'thumb-label-moderate' };
+                    case 3:
+                        return { thumbClass: 'thumb-severe', thumbLabelClass: 'thumb-label-severe' };
                     default:
                         return { thumbClass: '', thumbLabelClass: '' };
                 }
@@ -377,18 +366,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     
         function getNumArrows(vitalSign) {
-            if (vitalSign.name === "Oxygen Saturation" || vitalSign.name.startsWith("Inspired Oxygen")) {
-                return 6;
+            if (vitalSign.name === "Oxygen Saturation") {
+                return 3;
+            } else if (vitalSign.name.startsWith("Inspired Oxygen")) {
+                return 3;
             } else {
                 return 6;
             }
         }
     
-        // Initialize thresholds
+        // Initialize thresholds with random positions
         function initializeThresholds() {
             thresholds = [{ value: min, levelIndex: 0 }];
     
-            const initialPositions = getInitialPositions(numArrows, min, max, vitalSign.step);
+            const initialPositions = getRandomPositions(numArrows, min, max, vitalSign.step);
     
             initialPositions.forEach((val, idx) => {
                 thresholds.push({ value: val, levelIndex: idx + 1 });
@@ -397,18 +388,32 @@ document.addEventListener('DOMContentLoaded', () => {
             thresholds.push({ value: max, levelIndex: levels.length - 1 });
         }
     
-        // Function to initialize arrows at positions evenly distributed within the range
-        function getInitialPositions(numArrows, min, max, step) {
+        // Function to generate random positions for the arrows
+        function getRandomPositions(numArrows, min, max, step) {
             const positions = [];
-            const interval = (max - min) / (numArrows + 1);
-            for (let i = 1; i <= numArrows; i++) {
-                const position = min + i * interval;
+    
+            // Divide the range into (numArrows + 1) segments
+            const segmentSize = (max - min) / (numArrows + 1);
+    
+            for (let i = 0; i < numArrows; i++) {
+                // Define segment boundaries
+                const segmentMin = min + i * segmentSize;
+                const segmentMax = min + (i + 1) * segmentSize;
+    
+                // Generate a random value within the segment
+                let randomValue = segmentMin + Math.random() * (segmentMax - segmentMin);
+    
                 // Snap to nearest step
-                const snappedPosition = Math.round(position / step) * step;
-                positions.push(snappedPosition);
+                randomValue = Math.round(randomValue / step) * step;
+    
+                // Ensure value is within segment boundaries after snapping
+                randomValue = Math.max(segmentMin, Math.min(randomValue, segmentMax));
+    
+                positions.push(randomValue);
             }
-            // Ensure positions are within bounds and sorted
-            return positions.map(pos => Math.max(min, Math.min(pos, max))).sort((a, b) => a - b);
+    
+            // Sort positions to ensure they are in order
+            return positions.sort((a, b) => a - b);
         }
     
         vitalSign.getValues = function() {
@@ -454,7 +459,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const tickContainer = document.createElement('div');
             tickContainer.className = 'tick-container';
             tickContainer.style.position = 'relative';
-            tickContainer.style.height = '10px';
+            tickContainer.style.height = '20px';
             scaleContainer.appendChild(tickContainer);
     
             for (let i = 0; i < numTicks; i++) {
@@ -470,8 +475,41 @@ document.addEventListener('DOMContentLoaded', () => {
                 tick.style.left = `${percent}%`;
                 tick.style.transform = 'translateX(-50%)';
     
+                const tickLabel = document.createElement('span');
+                tickLabel.className = 'tick-label';
+                tickLabel.style.position = 'absolute';
+                tickLabel.style.top = '15px';
+                tickLabel.style.left = `${percent}%`;
+                tickLabel.style.transform = 'translateX(-50%)';
+                tickLabel.textContent = formatValue(value, vitalSign);
+    
                 tickContainer.appendChild(tick);
+                tickContainer.appendChild(tickLabel);
                 ticks.push({ tick, value });
+            }
+    
+            // Create smaller ticks in between the major ticks
+            const minorTickInterval = vitalSign.majorTick / 5; // Smaller ticks between major ticks
+            const numMinorTicks = Math.floor((max - min) / minorTickInterval);
+            for (let i = 0; i < numMinorTicks; i++) {
+                const minorTickValue = min + i * minorTickInterval;
+                const percent = ((minorTickValue - min) / (max - min)) * 100;
+    
+                // Skip if it's a major tick value
+                if (i % 5 === 0) {
+                    continue;
+                }
+    
+                const minorTick = document.createElement('div');
+                minorTick.className = 'minor-tick';
+                minorTick.style.position = 'absolute';
+                minorTick.style.height = '5px';
+                minorTick.style.width = '1px';
+                minorTick.style.backgroundColor = '#ccc';
+                minorTick.style.left = `${percent}%`;
+                minorTick.style.transform = 'translateX(-50%)';
+    
+                tickContainer.appendChild(minorTick);
             }
         }
     
