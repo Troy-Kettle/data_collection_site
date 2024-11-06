@@ -66,44 +66,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Save data to Firestore
     function saveDataToFirestore() {
-        // Collect Consent Data
-        const consentData = {
-            consent1: document.querySelector('input[name="consent1"]')?.checked ? 'Consented' : 'Not Consented',
-            consent2: document.querySelector('input[name="consent2"]')?.checked ? 'Consented' : 'Not Consented',
-            consent3: document.querySelector('input[name="consent3"]')?.checked ? 'Consented' : 'Not Consented'
-        };
-
-        // Collect Basic Info Data
-        const basicInfoData = {
-            experience: document.querySelector('input[name="experience"]')?.value || 'Not provided',
-            location: document.querySelector('input[name="location"]')?.value || 'Not provided',
-            role: document.querySelector('input[name="role"]')?.value || 'Not provided',
-            specialty: document.querySelector('input[name="specialty"]')?.value || 'Not provided',
-            experience_years: document.querySelector('input[name="experience_years"]')?.value || 'Not provided'
-        };
-
-        // Collect Part 1 Data (Thresholds)
-        const part1Data = {
-            thresholds: vitalSignsData.map(vitalSign => {
-                const values = document.querySelectorAll(`input[name="${vitalSign.name}-threshold"]`);
-                return {
-                    'Vital Sign': vitalSign.name,
-                    'Unit': vitalSign.unit,
-                    'Values': values.length > 0 ? Array.from(values).map(input => input.value).join(', ') : 'Not provided'
-                };
-            })
-        };
-
-        // Collect Part 2 Data (Ratings)
-        const part2Data = [];
-        const combinations = document.querySelectorAll('.combination-rating');
-        combinations.forEach(combo => {
-            const ratingValue = combo.querySelector('input[type="range"]')?.value || 'Not provided';
-            part2Data.push({
-                'Combination': combo.getAttribute('data-combination') || 'Not provided',
-                'Rating': ratingValue
-            });
-        });
+        // Retrieve data from sessionStorage
+        const consentData = JSON.parse(sessionStorage.getItem('consentData')) || {};
+        const basicInfoData = JSON.parse(sessionStorage.getItem('basicInfoData')) || {};
+        const part1Data = JSON.parse(sessionStorage.getItem('part1Data')) || {};
+        const part2Data = JSON.parse(sessionStorage.getItem('part2Data')) || {};
 
         // Collect Part 3 Data (Further Interpretation)
         const part3Data = vitalSignsData.map(vitalSign => {

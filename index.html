@@ -20,9 +20,9 @@
             messagingSenderId: "171849859334",
             appId: "1:171849859334:web:c0c40fd8ca74a9e10e9e87",
             measurementId: "G-F2WDNKDP5R"
-          };
+        };
           
-          // Initialize Firebase
+        // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
     </script>
@@ -141,7 +141,7 @@
     <script>
         document.getElementById('consentForm').addEventListener('submit', async function(event) {
             event.preventDefault(); // Prevent form from submitting
-    
+
             // Collect Consent Form Data
             const consent1Element = document.querySelector('input[name="consent1"]');
             const consent2Element = document.querySelector('input[name="consent2"]');
@@ -150,38 +150,38 @@
             const consent1Checked = consent1Element ? consent1Element.checked : null;
             const consent2Checked = consent2Element ? consent2Element.checked : null;
             const consent3Checked = consent3Element ? consent3Element.checked : null;
-    
+
             if (consent1Checked === null || consent2Checked === null || consent3Checked === null) {
                 console.error('Error: One or more consent checkboxes are not found.');
                 alert('Please make sure you have agreed to all consent items.');
                 return; // Don't proceed if the consent checkboxes are not available
             }
-    
+
             const consentData = {
                 consent1: consent1Checked ? 'Consented' : 'Not Consented',
                 consent2: consent2Checked ? 'Consented' : 'Not Consented',
                 consent3: consent3Checked ? 'Consented' : 'Not Consented'
             };
-    
+
             // Collect Screening Questions
             const experienceElement = document.querySelector('select[name="experience"]');
             const locationElement = document.querySelector('select[name="location"]');
             const roleElement = document.querySelector('select[name="role"]');
             const specialtyElement = document.querySelector('select[name="specialty"]');
             const experienceYearsElement = document.querySelector('select[name="experience_years"]');
-    
+
             const experience = experienceElement ? experienceElement.value : null;
             const location = locationElement ? locationElement.value : null;
             const role = roleElement ? roleElement.value : null;
             const specialty = specialtyElement ? specialtyElement.value : null;
             const experience_years = experienceYearsElement ? experienceYearsElement.value : null;
-    
+
             // Check if all required fields are filled in
             if (!experience || !location || !role || !specialty || !experience_years) {
                 alert('Please complete all required fields in the Basic Information section.');
                 return; // Don't proceed if any required field is missing
             }
-    
+
             const basicInfoData = {
                 experience: experience,
                 location: location,
@@ -189,23 +189,13 @@
                 specialty: specialty,
                 experience_years: experience_years
             };
-    
-            try {
-                // Save data to Firestore
-                const docRef = await db.collection('vital_signs_survey').add({
-                    consentData: consentData,
-                    basicInfoData: basicInfoData,
-                    timestamp: new Date()
-                });
-    
-                console.log('Document written with ID: ', docRef.id);
-    
-                // Now proceed to the next page
-                window.location.href = 'part1.html';
-            } catch (e) {
-                console.error('Error adding document: ', e);
-                alert('There was an error saving your data. Please try again.');
-            }
+
+            // Save consentData and basicInfoData to sessionStorage
+            sessionStorage.setItem('consentData', JSON.stringify(consentData));
+            sessionStorage.setItem('basicInfoData', JSON.stringify(basicInfoData));
+
+            // Now proceed to the next page
+            window.location.href = 'part1.html';
         });
     </script>
 </body>

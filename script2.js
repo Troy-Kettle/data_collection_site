@@ -45,7 +45,6 @@ const combinations = [
     {'Heart Rate': { value: "Normal", abnormal: false }, 'Systolic Blood Pressure': { value: 'Normal', abnormal: false }, 'Respiratory Rate': { value: "Normal", abnormal: false }, 'Temperature': { value: "High", abnormal: true }, 'Oxygen Saturation': { value: "Low", abnormal: true }},
 ];
 
-
 function createCombinationElement(combination, index) {
     const container = document.createElement('div');
     container.className = 'combination';
@@ -110,7 +109,7 @@ function createCombinationElement(combination, index) {
     });
 
     // Load saved value if available
-    const savedData = JSON.parse(localStorage.getItem('part2Data'));
+    const savedData = JSON.parse(sessionStorage.getItem('part2Data'));
     if (savedData && savedData[index]) {
         sliderInput.value = savedData[index].Rating;
         sliderValueDisplay.textContent = sliderInput.value;
@@ -132,8 +131,8 @@ function collectData() {
         };
     });
 
-    // Store data in localStorage
-    localStorage.setItem('part2Data', JSON.stringify(part2Ratings));
+    // Store data in sessionStorage
+    sessionStorage.setItem('part2Data', JSON.stringify(part2Ratings));
 
     return part2Ratings;
 }
@@ -156,36 +155,60 @@ const submitButton = document.getElementById('submitButton');
 submitButton.addEventListener('click', () => {
     const data = collectData();
     alert('Your responses have been saved. Please proceed to Part 3.');
+    // Add code here to submit data to Firestore
+    if (typeof firebase !== 'undefined') {
+        submitToFirestore(data);
+    } else {
+        console.error('Firebase is not defined. Make sure Firebase SDK is loaded.');
+    }
     window.location.href = 'part3.html';
 });
 
+// Function to submit data to Firestore
+function submitToFirestore(data) {
+    // Assuming Firestore has already been initialized
+    if (typeof firebase !== 'undefined') {
+        const db = firebase.firestore();
+        db.collection('part2Data').add({
+            data: data,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(() => {
+            console.log('Data successfully submitted to Firestore');
+        }).catch((error) => {
+            console.error('Error submitting data to Firestore: ', error);
+        });
+    } else {
+        console.error('Firebase is not defined. Make sure Firebase SDK is loaded.');
+    }
+}
+
 // Function to initialize Part 2 with data from Part 1
 function initPart2() {
-    // Retrieve the collected data from localStorage
-    const part1Data = JSON.parse(localStorage.getItem('part1Data'));
+    // Retrieve the collected data from sessionStorage
+    const part1Data = JSON.parse(sessionStorage.getItem('part1Data'));
 
-    // Check if data is available
+    // // Check if data is available
     // if (!part1Data) {
     //     alert('No data from Part 1 found. Please complete Part 1 first.');
     //     window.location.href = 'part1.html';
     //     return;
     // }
 
-// Display thresholds from Part 1 in Part 2 -THIS WORKS DO NOT DELETE
-    // part1Data.thresholds.forEach(item => {
-    //     const combinationDiv = document.createElement('div');
-    //     combinationDiv.className = 'combination-item';
+    // Display thresholds from Part 1 in Part 2 -THIS WORKS DO NOT DELETE
+    part1Data.thresholds.forEach(item => {
+        const combinationDiv = document.createElement('div');
+        combinationDiv.className = 'combination-item';
 
-    //     const title = document.createElement('h3');
-    //     title.textContent = `Combination for: ${item['Vital Sign']} (${item['Unit']})`;
-    //     combinationDiv.appendChild(title);
+        const title = document.createElement('h3');
+        title.textContent = `Combination for: ${item['Vital Sign']} (${item['Unit']})`;
+        combinationDiv.appendChild(title);
 
-    //     const values = document.createElement('p');
-    //     values.textContent = `Thresholds: ${item['Values']}`;
-    //     combinationDiv.appendChild(values);
+        const values = document.createElement('p');
+        values.textContent = `Thresholds: ${item['Values']}`;
+        combinationDiv.appendChild(values);
 
-    //     part2Container.appendChild(combinationDiv);
-    // });
+        part2Container.appendChild(combinationDiv);
+    });
 }
 
 // Call the initialization function when the page loads
