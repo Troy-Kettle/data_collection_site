@@ -109,46 +109,86 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     
         // Function to toggle section visibility
-        function toggleSection(index, visible) {
-            vitalSign.sectionStates[index - 1] = visible;
-            updatePositions();
+       // Function to toggle section visibility
+    function toggleSection(index, visible) {
+        // Check if this is the "No concern" section before allowing toggle
+        const level = levels[thresholds[index - 1].levelIndex];
+        if (level.label === 'No concern' && !visible) {
+            return; // Prevent hiding the "No concern" section
         }
+        vitalSign.sectionStates[index - 1] = visible;
+        updatePositions();
+    }
     
-        function enforceBoundaries(index) {
-            const threshold = thresholds[index];
-    
-            // Ensure thresholds stay within min and max
-            threshold.value = Math.max(min, Math.min(threshold.value, max));
-    
-            // Handle section visibility based on overlap
-            if (index > 0 && index < thresholds.length - 1) {
-                // Check overlap with previous sections (going left to right)
-                for (let i = index - 1; i > 0; i--) {
-                    const prevVisible = isSectionVisible(i);
-                    if (prevVisible && thresholds[i].value >= threshold.value) {
-                        if (isNoConcernBoundary(i)) {
-                            // If trying to eliminate 'no concern' section, prevent movement
-                            threshold.value = thresholds[i].value;
-                        } else {
-                            // Hide the overlapped section
-                            toggleSection(i, false);
-                        }
+    function enforceBoundaries(index) {
+        const threshold = thresholds[index];
+        const originalValue = threshold.value;
+
+        // Ensure thresholds stay within min and max
+        threshold.value = Math.max(min, Math.min(threshold.value, max));
+
+        // Check if this movement would make the "No concern" section too small
+        let noConcernStart, noConcernEnd;
+        
+        if (vitalSign.name === "Oxygen Saturation") {
+            noConcernStart = thresholds[thresholds.length - 2].value;
+            noConcernEnd = max;
+        } else if (vitalSign.name.startsWith("Inspired Oxygen")) {
+            noConcernStart = min;
+            noConcernEnd = thresholds[1].value;
+        } else {
+            noConcernStart = thresholds[3].value;
+            noConcernEnd = thresholds[4].value;
+        }
+
+        // Minimum width for "No concern" section (adjust as needed)
+        const minWidth = (max - min) * 0.01; // 5% of total range
+
+        // If moving a boundary would make "No concern" section too small, prevent it
+        if (index > 0 && index < thresholds.length - 1) {
+            if (vitalSign.name === "Oxygen Saturation") {
+                if (index === thresholds.length - 2 && (max - threshold.value) < minWidth) {
+                    threshold.value = max - minWidth;
+                }
+            } else if (vitalSign.name.startsWith("Inspired Oxygen")) {
+                if (index === 1 && (threshold.value - min) < minWidth) {
+                    threshold.value = min + minWidth;
+                }
+            } else {
+                if (index === 3 && (thresholds[4].value - threshold.value) < minWidth) {
+                    threshold.value = thresholds[4].value - minWidth;
+                }
+                if (index === 4 && (threshold.value - thresholds[3].value) < minWidth) {
+                    threshold.value = thresholds[3].value + minWidth;
+                }
+            }
+        }
+
+        // Continue with the rest of the original enforceBoundaries logic
+        if (index > 0 && index < thresholds.length - 1) {
+            // Check overlap with previous sections (going left to right)
+            for (let i = index - 1; i > 0; i--) {
+                const prevVisible = isSectionVisible(i);
+                if (prevVisible && thresholds[i].value >= threshold.value) {
+                    if (isNoConcernBoundary(i)) {
+                        threshold.value = thresholds[i].value;
+                    } else {
+                        toggleSection(i, false);
                     }
                 }
-    
-                // Check overlap with next sections (going right to left)
-                for (let i = index + 1; i < thresholds.length - 1; i++) {
-                    const nextVisible = isSectionVisible(i);
-                    if (nextVisible && thresholds[i].value <= threshold.value) {
-                        if (isNoConcernBoundary(i)) {
-                            // If trying to eliminate 'no concern' section, prevent movement
-                            threshold.value = thresholds[i].value;
-                        } else {
-                            // Hide the overlapped section
-                            toggleSection(i, false);
-                        }
+            }
+
+            // Check overlap with next sections (going right to left)
+            for (let i = index + 1; i < thresholds.length - 1; i++) {
+                const nextVisible = isSectionVisible(i);
+                if (nextVisible && thresholds[i].value <= threshold.value) {
+                    if (isNoConcernBoundary(i)) {
+                        threshold.value = thresholds[i].value;
+                    } else {
+                        toggleSection(i, false);
                     }
                 }
+            }
     
                 // Restore hidden sections if moving away
                 for (let i = index - 1; i > 0; i--) {
