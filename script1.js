@@ -126,12 +126,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 for (let i = index - 1; i > 0; i--) {
                     const prevVisible = isSectionVisible(i);
                     if (prevVisible && thresholds[i].value >= threshold.value) {
-                        // Don't hide "no concern" section
-                        if (!isNoConcernBoundary(i)) {
-                            toggleSection(i, false);
+                        if (isNoConcernBoundary(i)) {
+                            // If trying to eliminate 'no concern' section, prevent movement
+                            threshold.value = thresholds[i].value;
                         } else {
-                            // If trying to hide "no concern", prevent the movement
-                            threshold.value = thresholds[i].value + vitalSign.step;
+                            // Hide the overlapped section
+                            toggleSection(i, false);
                         }
                     }
                 }
@@ -140,17 +140,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 for (let i = index + 1; i < thresholds.length - 1; i++) {
                     const nextVisible = isSectionVisible(i);
                     if (nextVisible && thresholds[i].value <= threshold.value) {
-                        // Don't hide "no concern" section
-                        if (!isNoConcernBoundary(i)) {
-                            toggleSection(i, false);
+                        if (isNoConcernBoundary(i)) {
+                            // If trying to eliminate 'no concern' section, prevent movement
+                            threshold.value = thresholds[i].value;
                         } else {
-                            // If trying to hide "no concern", prevent the movement
-                            threshold.value = thresholds[i].value - vitalSign.step;
+                            // Hide the overlapped section
+                            toggleSection(i, false);
                         }
                     }
                 }
     
-                // Check if moving away from hidden sections - restore them (going left to right)
+                // Restore hidden sections if moving away
                 for (let i = index - 1; i > 0; i--) {
                     const prevHidden = !isSectionVisible(i);
                     if (prevHidden && thresholds[i].value < threshold.value) {
@@ -158,7 +158,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
     
-                // Check if moving away from hidden sections - restore them (going right to left)
                 for (let i = index + 1; i < thresholds.length - 1; i++) {
                     const nextHidden = !isSectionVisible(i);
                     if (nextHidden && thresholds[i].value > threshold.value) {
@@ -186,19 +185,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     const thumbLabel = thumbLabels[index - 1];
                     const percent = ((threshold.value - min) / (max - min)) * 100;
     
-                    // Only show thumb and label if section is visible
-                    if (isSectionVisible(index)) {
-                        thumb.style.display = 'block';
-                        thumb.style.left = `${percent}%`;
-                        thumb.style.transform = 'translateX(-50%)';
+                    // Always show thumb and label
+                    thumb.style.display = 'block';
+                    thumb.style.left = `${percent}%`;
+                    thumb.style.transform = 'translateX(-50%)';
     
-                        thumbLabel.style.display = 'block';
-                        thumbLabel.style.left = `${percent}%`;
-                        thumbLabel.style.transform = 'translateX(-50%)';
-                        thumbLabel.textContent = formatValue(threshold.value, vitalSign);
+                    thumbLabel.style.display = 'block';
+                    thumbLabel.style.left = `${percent}%`;
+                    thumbLabel.style.transform = 'translateX(-50%)';
+                    thumbLabel.textContent = formatValue(threshold.value, vitalSign);
+    
+                    // Adjust appearance if section is hidden
+                    if (!isSectionVisible(index)) {
+                        thumb.style.opacity = '0.5';
+                        thumbLabel.style.opacity = '0.5';
                     } else {
-                        thumb.style.display = 'none';
-                        thumbLabel.style.display = 'none';
+                        thumb.style.opacity = '1';
+                        thumbLabel.style.opacity = '1';
                     }
                 }
             });
@@ -209,11 +212,14 @@ document.addEventListener('DOMContentLoaded', () => {
     
             for (let i = 1; i < thresholds.length; i++) {
                 if (isSectionVisible(i)) {
-                    visibleRanges.push({
-                        start: lastVisibleValue,
-                        end: thresholds[i].value,
-                        levelIndex: Math.max(0, Math.min(levels.length - 1, thresholds[i - 1].levelIndex))
-                    });
+                    // Only add ranges with non-zero width
+                    if (thresholds[i].value !== lastVisibleValue) {
+                        visibleRanges.push({
+                            start: lastVisibleValue,
+                            end: thresholds[i].value,
+                            levelIndex: Math.max(0, Math.min(levels.length - 1, thresholds[i - 1].levelIndex))
+                        });
+                    }
                     lastVisibleValue = thresholds[i].value;
                 }
             }
@@ -224,19 +230,21 @@ document.addEventListener('DOMContentLoaded', () => {
     
             // Create new ranges without changing the colors of remaining sections
             visibleRanges.forEach((rangeData) => {
-                const startPercent = ((rangeData.start - min) / (max - min)) * 100;
-                const endPercent = ((rangeData.end - min) / (max - min)) * 100;
-                const width = endPercent - startPercent;
+                if (rangeData.start !== rangeData.end) { // Only create ranges with non-zero width
+                    const startPercent = ((rangeData.start - min) / (max - min)) * 100;
+                    const endPercent = ((rangeData.end - min) / (max - min)) * 100;
+                    const width = endPercent - startPercent;
     
-                const range = document.createElement('div');
-                range.className = 'range';
-                range.style.left = `${startPercent}%`;
-                range.style.width = `${width}%`;
-                range.style.backgroundColor = levels[rangeData.levelIndex].color;
-                range.style.position = 'absolute';
-                range.style.height = '20px';
-                scaleContainer.appendChild(range);
-                ranges.push(range);
+                    const range = document.createElement('div');
+                    range.className = 'range';
+                    range.style.left = `${startPercent}%`;
+                    range.style.width = `${width}%`;
+                    range.style.backgroundColor = levels[rangeData.levelIndex].color;
+                    range.style.position = 'absolute';
+                    range.style.height = '20px';
+                    scaleContainer.appendChild(range);
+                    ranges.push(range);
+                }
             });
     
             updateTickMarksColor();
@@ -247,20 +255,22 @@ document.addEventListener('DOMContentLoaded', () => {
             tableBody.innerHTML = '';
     
             visibleRanges.forEach(range => {
-                const row = document.createElement('tr');
-                const levelCell = document.createElement('td');
-                levelCell.textContent = levels[range.levelIndex].label;
+                if (range.start !== range.end) { // Only add rows for ranges with non-zero width
+                    const row = document.createElement('tr');
+                    const levelCell = document.createElement('td');
+                    levelCell.textContent = levels[range.levelIndex].label;
     
-                const lowerCell = document.createElement('td');
-                lowerCell.textContent = formatValue(range.start, vitalSign);
+                    const lowerCell = document.createElement('td');
+                    lowerCell.textContent = formatValue(range.start, vitalSign);
     
-                const upperCell = document.createElement('td');
-                upperCell.textContent = formatValue(range.end, vitalSign);
+                    const upperCell = document.createElement('td');
+                    upperCell.textContent = formatValue(range.end, vitalSign);
     
-                row.appendChild(levelCell);
-                row.appendChild(lowerCell);
-                row.appendChild(upperCell);
-                tableBody.appendChild(row);
+                    row.appendChild(levelCell);
+                    row.appendChild(lowerCell);
+                    row.appendChild(upperCell);
+                    tableBody.appendChild(row);
+                }
             });
         }
     
@@ -418,7 +428,16 @@ document.addEventListener('DOMContentLoaded', () => {
     
         vitalSign.getValues = function() {
             return thresholds.slice(1, -1)
-                .filter((_, index) => isSectionVisible(index + 1))
+                .filter((t, index) => {
+                    const prevValue = thresholds[index].value;
+                    const nextValue = thresholds[index + 2].value;
+                    // Exclude thresholds that have same value as previous or next (zero-width ranges)
+                    return (
+                        //isSectionVisible(index + 1) &&
+                        t.value !== prevValue &&
+                        t.value !== nextValue
+                    );
+                })
                 .map(t => formatValue(t.value, vitalSign));
         };
     
