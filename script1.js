@@ -103,22 +103,55 @@ document.addEventListener('DOMContentLoaded', () => {
             vitalSign.sectionStates = Array(numArrows + 1).fill(true); // Adjusted to include last section
         }
     
-        // Function to enforce boundaries and ensure no overlapping
-        function enforceBoundaries(index) {
-            const threshold = thresholds[index];
-            const originalValue = threshold.value;
-    
-            // Ensure thresholds stay within min and max
-            threshold.value = Math.max(min, Math.min(threshold.value, max));
-    
-            // Ensure thresholds do not overlap
-            if (index > 0) {
-                threshold.value = Math.max(thresholds[index - 1].value + vitalSign.step, threshold.value);
-            }
-            if (index < thresholds.length - 1) {
-                threshold.value = Math.min(thresholds[index + 1].value - vitalSign.step, threshold.value);
-            }
+// Function to enforce boundaries and ensure no overlapping
+function enforceBoundaries(index) {
+    const threshold = thresholds[index];
+
+    // Ensure thresholds stay within min and max
+    threshold.value = Math.max(min, Math.min(threshold.value, max));
+
+    // Ensure thresholds do not overlap, allowing zero-width ranges except for "No concern"
+    if (index > 0 && levels[thresholds[index - 1].levelIndex].label !== 'No concern') {
+        threshold.value = Math.max(thresholds[index - 1].value, threshold.value);
+    }
+    if (index < thresholds.length - 1 && levels[thresholds[index + 1].levelIndex].label !== 'No concern') {
+        threshold.value = Math.min(thresholds[index + 1].value, threshold.value);
+    }
+
+    // Ensure "No concern" section has a length of at least 3 units in both directions
+    const minNoConcernLength = 3;
+
+    // Enforce minimum length for "No concern" when adjusting the boundary from the left (prevent reducing its width)
+    if (index > 0 && levels[thresholds[index - 1].levelIndex].label === 'No concern') {
+        if (threshold.value < thresholds[index - 1].value + minNoConcernLength) {
+            threshold.value = thresholds[index - 1].value + minNoConcernLength;
         }
+    }
+
+    // Enforce minimum length for "No concern" when adjusting the boundary from the right (prevent reducing its width)
+    if (index < thresholds.length - 1 && levels[thresholds[index].levelIndex].label === 'No concern') {
+        if (threshold.value + minNoConcernLength > thresholds[index + 1].value) {
+            threshold.value = thresholds[index + 1].value - minNoConcernLength;
+        }
+    }
+
+    // Specifically allow "Low - mild concern" to collapse to zero-width, in both directions
+    if (levels[threshold.levelIndex].label === 'Low - mild concern') {
+        // Allow zero-width collapse from left to right
+        if (index > 0 && threshold.value <= thresholds[index - 1].value) {
+            threshold.value = thresholds[index - 1].value; // Allow collapse by aligning with the previous threshold
+        }
+        // Allow zero-width collapse from right to left
+        if (index < thresholds.length - 1 && threshold.value >= thresholds[index + 1].value) {
+            threshold.value = thresholds[index + 1].value; // Allow collapse by aligning with the next threshold
+        }
+    }
+}
+
+
+
+
+
     
         function updatePositions() {
             // Update thumbs and labels
@@ -149,8 +182,8 @@ document.addEventListener('DOMContentLoaded', () => {
             let lastVisibleValue = min;
     
             for (let i = 1; i < thresholds.length; i++) {
-                // Only add ranges with non-zero width
-                if (thresholds[i].value !== lastVisibleValue) {
+                // Only add ranges with non-zero width or "No concern" group
+                if (thresholds[i].value !== lastVisibleValue || levels[thresholds[i - 1].levelIndex].label === 'No concern') {
                     visibleRanges.push({
                         start: lastVisibleValue,
                         end: thresholds[i].value,
@@ -166,7 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
             // Create new ranges without changing the colors of remaining sections
             visibleRanges.forEach((rangeData) => {
-                if (rangeData.start !== rangeData.end) { // Only create ranges with non-zero width
+                if (rangeData.start !== rangeData.end || levels[rangeData.levelIndex].label === 'No concern') { // Only create ranges with non-zero width or "No concern"
                     const startPercent = ((rangeData.start - min) / (max - min)) * 100;
                     const endPercent = ((rangeData.end - min) / (max - min)) * 100;
                     const width = endPercent - startPercent;
@@ -191,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tableBody.innerHTML = '';
     
             visibleRanges.forEach(range => {
-                if (range.start !== range.end) { // Only add rows for ranges with non-zero width
+                if (range.start !== range.end || levels[range.levelIndex].label === 'No concern') { // Only add rows for ranges with non-zero width or "No concern"
                     const row = document.createElement('tr');
                     const levelCell = document.createElement('td');
                     levelCell.textContent = levels[range.levelIndex].label;
@@ -612,4 +645,4 @@ document.addEventListener('DOMContentLoaded', () => {
     
         return data;
     }
-});
+});  
