@@ -118,8 +118,8 @@ function enforceBoundaries(index) {
         threshold.value = Math.min(thresholds[index + 1].value, threshold.value);
     }
 
-    // Ensure "No concern" section has a length of at least 3 units in both directions
-    const minNoConcernLength = 3;
+    // Set minimum length based on the vital sign (0.1 for Temperature, 1 for others)
+    const minNoConcernLength = (vitalSign.name === "Temperature") ? 0.1 : 1;
 
     // Enforce minimum length for "No concern" when adjusting the boundary from the left (prevent reducing its width)
     if (index > 0 && levels[thresholds[index - 1].levelIndex].label === 'No concern') {
@@ -148,88 +148,95 @@ function enforceBoundaries(index) {
     }
 }
 
-        function updatePositions() {
-            // Update thumbs and labels
-            thresholds.forEach((threshold, index) => {
-                if (index > 0 && index < thresholds.length - 1) {
-                    const thumb = thumbs[index - 1];
-                    const thumbLabel = thumbLabels[index - 1];
-                    const percent = ((threshold.value - min) / (max - min)) * 100;
-    
-                    // Always show thumb and label
-                    thumb.style.display = 'block';
-                    thumb.style.left = `${percent}%`;
-                    thumb.style.transform = 'translateX(-50%)';
-    
-                    thumbLabel.style.display = 'block';
-                    thumbLabel.style.left = `${percent}%`;
-                    thumbLabel.style.transform = 'translateX(-50%)';
-                    thumbLabel.textContent = formatValue(threshold.value, vitalSign);
-    
-                    // Adjust appearance if section is hidden
-                    thumb.style.opacity = '1';
-                    thumbLabel.style.opacity = '1';
-                }
-            });
-    
-            // Update ranges
-            const visibleRanges = [];
-            let lastVisibleValue = min;
-    
-            for (let i = 1; i < thresholds.length; i++) {
-                // Only add ranges with non-zero width or "No concern" group
-                if (thresholds[i].value !== lastVisibleValue || levels[thresholds[i - 1].levelIndex].label === 'No concern') {
-                    visibleRanges.push({
-                        start: lastVisibleValue,
-                        end: thresholds[i].value,
-                        levelIndex: Math.max(0, Math.min(levels.length - 1, thresholds[i - 1].levelIndex))
-                    });
-                }
-                lastVisibleValue = thresholds[i].value;
-            }
-    
-            // Clear existing ranges
-            ranges.forEach(range => range.remove());
-            ranges.length = 0;
-    
-            // Create new ranges without changing the colors of remaining sections
-            visibleRanges.forEach((rangeData) => {
-                if (rangeData.start !== rangeData.end || levels[rangeData.levelIndex].label === 'No concern') { // Only create ranges with non-zero width or "No concern"
-                    const startPercent = ((rangeData.start - min) / (max - min)) * 100;
-                    const endPercent = ((rangeData.end - min) / (max - min)) * 100;
-                    const width = endPercent - startPercent;
-    
-                    const range = document.createElement('div');
-                    range.className = 'range';
-                    range.style.left = `${startPercent}%`;
-                    range.style.width = `${width}%`;
-                    range.style.backgroundColor = levels[rangeData.levelIndex].color;
-                    range.style.position = 'absolute';
-                    range.style.height = '20px';
-                    scaleContainer.appendChild(range);
-                    ranges.push(range);
-                }
-            });
-    
-            updateTickMarksColor();
-            updateThresholdTable(visibleRanges);
+function updatePositions() {
+    // Update thumbs and labels
+    thresholds.forEach((threshold, index) => {
+        if (index > 0 && index < thresholds.length - 1) {
+            const thumb = thumbs[index - 1];
+            const thumbLabel = thumbLabels[index - 1];
+            const percent = ((threshold.value - min) / (max - min)) * 100;
+
+            // Always show thumb and label
+            thumb.style.display = 'block';
+            thumb.style.left = `${percent}%`;
+            thumb.style.transform = 'translateX(-50%)';
+
+            thumbLabel.style.display = 'block';
+            thumbLabel.style.left = `${percent}%`;
+            thumbLabel.style.transform = 'translateX(-50%)';
+
+            // Show adjusted lower bound value for label (add 1 except for the first threshold)
+            const displayValue = index === 1 ? threshold.value : threshold.value + 1;
+            thumbLabel.textContent = formatValue(displayValue, vitalSign);
+
+            // Adjust appearance if section is hidden
+            thumb.style.opacity = '1';
+            thumbLabel.style.opacity = '1';
         }
+    });
+
+    // Update ranges
+    const visibleRanges = [];
+    let lastVisibleValue = min;
+
+    for (let i = 1; i < thresholds.length; i++) {
+        // Only add ranges with non-zero width or "No concern" group
+        if (thresholds[i].value !== lastVisibleValue || levels[thresholds[i - 1].levelIndex].label === 'No concern') {
+            visibleRanges.push({
+                start: lastVisibleValue,
+                end: thresholds[i].value,
+                levelIndex: Math.max(0, Math.min(levels.length - 1, thresholds[i - 1].levelIndex))
+            });
+        }
+        lastVisibleValue = thresholds[i].value;
+    }
+
+    // Clear existing ranges
+    ranges.forEach(range => range.remove());
+    ranges.length = 0;
+
+    // Create new ranges without changing the colors of remaining sections
+    visibleRanges.forEach((rangeData) => {
+        if (rangeData.start !== rangeData.end || levels[rangeData.levelIndex].label === 'No concern') { // Only create ranges with non-zero width or "No concern"
+            const startPercent = ((rangeData.start - min) / (max - min)) * 100;
+            const endPercent = ((rangeData.end - min) / (max - min)) * 100;
+            const width = endPercent - startPercent;
+
+            const range = document.createElement('div');
+            range.className = 'range';
+            range.style.left = `${startPercent}%`;
+            range.style.width = `${width}%`;
+            range.style.backgroundColor = levels[rangeData.levelIndex].color;
+            range.style.position = 'absolute';
+            range.style.height = '20px';
+            scaleContainer.appendChild(range);
+            ranges.push(range);
+        }
+    });
+
+    updateTickMarksColor();
+    updateThresholdTable(visibleRanges);
+}
+
     
         function updateThresholdTable(visibleRanges) {
             tableBody.innerHTML = '';
-    
-            visibleRanges.forEach(range => {
+        
+            visibleRanges.forEach((range, index) => {
                 if (range.start !== range.end || levels[range.levelIndex].label === 'No concern') { // Only add rows for ranges with non-zero width or "No concern"
                     const row = document.createElement('tr');
                     const levelCell = document.createElement('td');
                     levelCell.textContent = levels[range.levelIndex].label;
-    
+        
                     const lowerCell = document.createElement('td');
-                    lowerCell.textContent = formatValue(range.start, vitalSign);
-    
+                    lowerCell.textContent = formatValue(
+                        index === 0 ? range.start : range.start + 1, // Add 1 to lower bound except for the first row
+                        vitalSign
+                    );
+        
                     const upperCell = document.createElement('td');
                     upperCell.textContent = formatValue(range.end, vitalSign);
-    
+        
                     row.appendChild(levelCell);
                     row.appendChild(lowerCell);
                     row.appendChild(upperCell);
@@ -237,6 +244,7 @@ function enforceBoundaries(index) {
                 }
             });
         }
+        
     
         function formatValue(value, vitalSign) {
             const decimals = getMaxDecimalDigits(vitalSign.step);
