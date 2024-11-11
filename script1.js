@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         {
             name: "Respiratory Rate",
             unit: "breaths/min",
-            min: 1,
+            min: 0,
             max: 60,
             step: 1,
             majorTick: 5,
