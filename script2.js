@@ -182,34 +182,34 @@ function submitToFirestore(data) {
     }
 }
 
-// Function to initialize Part 2 with data from Part 1
-function initPart2() {
-    // Retrieve the collected data from sessionStorage
-    const part1Data = JSON.parse(sessionStorage.getItem('part1Data'));
+// // Function to initialize Part 2 with data from Part 1
+// function initPart2() {
+//     // Retrieve the collected data from sessionStorage
+//     const part1Data = JSON.parse(sessionStorage.getItem('part1Data'));
 
-    // // Check if data is available
-    // if (!part1Data) {
-    //     alert('No data from Part 1 found. Please complete Part 1 first.');
-    //     window.location.href = 'part1.html';
-    //     return;
-    // }
+//     // // Check if data is available
+//     // if (!part1Data) {
+//     //     alert('No data from Part 1 found. Please complete Part 1 first.');
+//     //     window.location.href = 'part1.html';
+//     //     return;
+//     // }
 
-    // Display thresholds from Part 1 in Part 2 -THIS WORKS DO NOT DELETE
-    part1Data.thresholds.forEach(item => {
-        const combinationDiv = document.createElement('div');
-        combinationDiv.className = 'combination-item';
+//     // Display thresholds from Part 1 in Part 2 -THIS WORKS DO NOT DELETE
+//     part1Data.thresholds.forEach(item => {
+//         const combinationDiv = document.createElement('div');
+//         combinationDiv.className = 'combination-item';
 
-        const title = document.createElement('h3');
-        title.textContent = `Combination for: ${item['Vital Sign']} (${item['Unit']})`;
-        combinationDiv.appendChild(title);
+//         const title = document.createElement('h3');
+//         title.textContent = `Combination for: ${item['Vital Sign']} (${item['Unit']})`;
+//         combinationDiv.appendChild(title);
 
-        const values = document.createElement('p');
-        values.textContent = `Thresholds: ${item['Values']}`;
-        combinationDiv.appendChild(values);
+//         const values = document.createElement('p');
+//         values.textContent = `Thresholds: ${item['Values']}`;
+//         combinationDiv.appendChild(values);
 
-        part2Container.appendChild(combinationDiv);
-    });
-}
+//         part2Container.appendChild(combinationDiv);
+//     });
+// }
 
 // Call the initialization function when the page loads
 window.onload = initPart2;

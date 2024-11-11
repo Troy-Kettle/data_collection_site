@@ -148,11 +148,6 @@ function enforceBoundaries(index) {
     }
 }
 
-
-
-
-
-    
         function updatePositions() {
             // Update thumbs and labels
             thresholds.forEach((threshold, index) => {
