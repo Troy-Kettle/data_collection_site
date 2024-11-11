@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
             reverseScale: true
         },
         {
-            name: "Inspired Oxygen (L/min)",
+            name: "Inspired Oxygen -",
             unit: "L/min",
             min: 0,
             max: 15,
@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
             hasBothDirections: false
         },
         {
-            name: "Inspired Oxygen (%)",
+            name: "Inspired Oxygen -",
             unit: "%",
             min: 20,
             max: 100,
