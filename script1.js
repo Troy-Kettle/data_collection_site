@@ -103,116 +103,20 @@ document.addEventListener('DOMContentLoaded', () => {
             vitalSign.sectionStates = Array(numArrows + 1).fill(true); // Adjusted to include last section
         }
     
-        // Function to check if a section is visible
-        function isSectionVisible(index) {
-            return vitalSign.sectionStates[index - 1]; // Adjust index since thresholds include min/max
-        }
-    
-        // Function to toggle section visibility
-        function toggleSection(index, visible) {
-            // Check if this is the "No concern" section before allowing toggle
-            const level = levels[thresholds[index - 1].levelIndex];
-            if (level.label === 'No concern' && !visible) {
-                return; // Prevent hiding the "No concern" section
-            }
-            vitalSign.sectionStates[index - 1] = visible;
-            updatePositions();
-        }
-    
+        // Function to enforce boundaries and ensure no overlapping
         function enforceBoundaries(index) {
             const threshold = thresholds[index];
             const originalValue = threshold.value;
-
+    
             // Ensure thresholds stay within min and max
             threshold.value = Math.max(min, Math.min(threshold.value, max));
-
-            // Check if this movement would make the "No concern" section too small
-            let noConcernStart, noConcernEnd;
-            
-            if (vitalSign.name === "Oxygen Saturation") {
-                noConcernStart = thresholds[thresholds.length - 2].value;
-                noConcernEnd = max;
-            } else if (vitalSign.name.startsWith("Inspired Oxygen")) {
-                noConcernStart = min;
-                noConcernEnd = thresholds[1].value;
-            } else {
-                noConcernStart = thresholds[3].value;
-                noConcernEnd = thresholds[4].value;
-            }
-
-            // Minimum width for "No concern" section (adjust as needed)
-            const minWidth = (max - min) * 0.01; // 5% of total range
-
-            // If moving a boundary would make "No concern" section too small, prevent it
-            if (index > 0 && index < thresholds.length - 1) {
-                if (vitalSign.name === "Oxygen Saturation") {
-                    if (index === thresholds.length - 2 && (max - threshold.value) < minWidth) {
-                        threshold.value = max - minWidth;
-                    }
-                } else if (vitalSign.name.startsWith("Inspired Oxygen")) {
-                    if (index === 1 && (threshold.value - min) < minWidth) {
-                        threshold.value = min + minWidth;
-                    }
-                } else {
-                    if (index === 3 && (thresholds[4].value - threshold.value) < minWidth) {
-                        threshold.value = thresholds[4].value - minWidth;
-                    }
-                    if (index === 4 && (threshold.value - thresholds[3].value) < minWidth) {
-                        threshold.value = thresholds[3].value + minWidth;
-                    }
-                }
-            }
-
-            // Continue with the rest of the original enforceBoundaries logic
-            if (index > 0 && index < thresholds.length - 1) {
-                // Check overlap with previous sections (going left to right)
-                for (let i = index - 1; i > 0; i--) {
-                    const prevVisible = isSectionVisible(i);
-                    if (prevVisible && thresholds[i].value >= threshold.value) {
-                        if (isNoConcernBoundary(i)) {
-                            threshold.value = thresholds[i].value;
-                        } else {
-                            toggleSection(i, false);
-                        }
-                    }
-                }
-
-                // Check overlap with next sections (going right to left)
-                for (let i = index + 1; i < thresholds.length - 1; i++) {
-                    const nextVisible = isSectionVisible(i);
-                    if (nextVisible && thresholds[i].value <= threshold.value) {
-                        if (isNoConcernBoundary(i)) {
-                            threshold.value = thresholds[i].value;
-                        } else {
-                            toggleSection(i, false);
-                        }
-                    }
-                }
     
-                // Restore hidden sections if moving away
-                for (let i = index - 1; i > 0; i--) {
-                    const prevHidden = !isSectionVisible(i);
-                    if (prevHidden && thresholds[i].value < threshold.value) {
-                        toggleSection(i, true);
-                    }
-                }
-    
-                for (let i = index + 1; i < thresholds.length - 1; i++) {
-                    const nextHidden = !isSectionVisible(i);
-                    if (nextHidden && thresholds[i].value > threshold.value) {
-                        toggleSection(i, true);
-                    }
-                }
+            // Ensure thresholds do not overlap
+            if (index > 0) {
+                threshold.value = Math.max(thresholds[index - 1].value + vitalSign.step, threshold.value);
             }
-        }
-    
-        function isNoConcernBoundary(index) {
-            if (vitalSign.name === "Oxygen Saturation") {
-                return index === thresholds.length - 2;
-            } else if (vitalSign.name.startsWith("Inspired Oxygen")) {
-                return index === 1;
-            } else {
-                return index === 3 || index === 4;
+            if (index < thresholds.length - 1) {
+                threshold.value = Math.min(thresholds[index + 1].value - vitalSign.step, threshold.value);
             }
         }
     
@@ -235,13 +139,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     thumbLabel.textContent = formatValue(threshold.value, vitalSign);
     
                     // Adjust appearance if section is hidden
-                    if (!isSectionVisible(index)) {
-                        thumb.style.opacity = '0.5';
-                        thumbLabel.style.opacity = '0.5';
-                    } else {
-                        thumb.style.opacity = '1';
-                        thumbLabel.style.opacity = '1';
-                    }
+                    thumb.style.opacity = '1';
+                    thumbLabel.style.opacity = '1';
                 }
             });
     
@@ -250,17 +149,15 @@ document.addEventListener('DOMContentLoaded', () => {
             let lastVisibleValue = min;
     
             for (let i = 1; i < thresholds.length; i++) {
-                if (isSectionVisible(i)) {
-                    // Only add ranges with non-zero width
-                    if (thresholds[i].value !== lastVisibleValue) {
-                        visibleRanges.push({
-                            start: lastVisibleValue,
-                            end: thresholds[i].value,
-                            levelIndex: Math.max(0, Math.min(levels.length - 1, thresholds[i - 1].levelIndex))
-                        });
-                    }
-                    lastVisibleValue = thresholds[i].value;
+                // Only add ranges with non-zero width
+                if (thresholds[i].value !== lastVisibleValue) {
+                    visibleRanges.push({
+                        start: lastVisibleValue,
+                        end: thresholds[i].value,
+                        levelIndex: Math.max(0, Math.min(levels.length - 1, thresholds[i - 1].levelIndex))
+                    });
                 }
+                lastVisibleValue = thresholds[i].value;
             }
     
             // Clear existing ranges
@@ -316,10 +213,6 @@ document.addEventListener('DOMContentLoaded', () => {
         function formatValue(value, vitalSign) {
             const decimals = getMaxDecimalDigits(vitalSign.step);
             return value.toFixed(decimals);
-        }
-    
-        function formatValueForLabel(value, vitalSign) {
-            return formatValue(value, vitalSign);
         }
     
         function getMaxDecimalDigits(step) {
@@ -472,7 +365,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     const nextValue = thresholds[index + 2].value;
                     // Exclude thresholds that have same value as previous or next (zero-width ranges)
                     return (
-                        //isSectionVisible(index + 1) &&
                         t.value !== prevValue &&
                         t.value !== nextValue
                     );
