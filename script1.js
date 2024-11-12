@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         {
             name: "Respiratory Rate",
             unit: "breaths/min",
-            min: 0,
+            min: 1,
             max: 60,
             step: 1,
             majorTick: 5,
@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
         {
             name: "Inspired Oxygen -",
             unit: "%",
-            min: 20,
+            min: 21,
             max: 100,
             step: 1,
             majorTick: 5,
@@ -88,7 +88,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
         const ranges = [];
         const thumbs = [];
-        const thumbLabels = [];
         const ticks = []; // Added to keep track of ticks
     
         const levels = getConcernLevels(vitalSign);
@@ -103,150 +102,131 @@ document.addEventListener('DOMContentLoaded', () => {
             vitalSign.sectionStates = Array(numArrows + 1).fill(true); // Adjusted to include last section
         }
     
-// Function to enforce boundaries and ensure no overlapping
-function enforceBoundaries(index) {
-    const threshold = thresholds[index];
-
-    // Ensure thresholds stay within min and max
-    threshold.value = Math.max(min, Math.min(threshold.value, max));
-
-    // Ensure thresholds do not overlap, allowing zero-width ranges except for "No concern"
-    if (index > 0 && levels[thresholds[index - 1].levelIndex].label !== 'No concern') {
-        threshold.value = Math.max(thresholds[index - 1].value, threshold.value);
-    }
-    if (index < thresholds.length - 1 && levels[thresholds[index + 1].levelIndex].label !== 'No concern') {
-        threshold.value = Math.min(thresholds[index + 1].value, threshold.value);
-    }
-
-    // Set minimum length based on the vital sign (0.1 for Temperature, 1 for others)
-    const minNoConcernLength = (vitalSign.name === "Temperature") ? 0.1 : 1;
-
-    // Enforce minimum length for "No concern" when adjusting the boundary from the left (prevent reducing its width)
-    if (index > 0 && levels[thresholds[index - 1].levelIndex].label === 'No concern') {
-        if (threshold.value < thresholds[index - 1].value + minNoConcernLength) {
-            threshold.value = thresholds[index - 1].value + minNoConcernLength;
+        // Function to enforce boundaries and ensure no overlapping
+        function enforceBoundaries(index) {
+            const threshold = thresholds[index];
+    
+            // Ensure thresholds stay within min and max
+            threshold.value = Math.max(min, Math.min(threshold.value, max));
+    
+            // Ensure thresholds do not overlap, allowing zero-width ranges except for "No concern"
+            if (index > 0 && levels[thresholds[index - 1].levelIndex].label !== 'No concern') {
+                threshold.value = Math.max(thresholds[index - 1].value, threshold.value);
+            }
+            if (index < thresholds.length - 1 && levels[thresholds[index + 1].levelIndex].label !== 'No concern') {
+                threshold.value = Math.min(thresholds[index + 1].value, threshold.value);
+            }
+    
+            // Set minimum length based on the vital sign (0.1 for Temperature, 1 for others)
+            const minNoConcernLength = (vitalSign.name === "Temperature") ? 0.1 : 1;
+    
+            // Enforce minimum length for "No concern" when adjusting the boundary from the left (prevent reducing its width)
+            if (index > 0 && levels[thresholds[index - 1].levelIndex].label === 'No concern') {
+                if (threshold.value < thresholds[index - 1].value + minNoConcernLength) {
+                    threshold.value = thresholds[index - 1].value + minNoConcernLength;
+                }
+            }
+    
+            // Enforce minimum length for "No concern" when adjusting the boundary from the right (prevent reducing its width)
+            if (index < thresholds.length - 1 && levels[thresholds[index].levelIndex].label === 'No concern') {
+                if (threshold.value + minNoConcernLength > thresholds[index + 1].value) {
+                    threshold.value = thresholds[index + 1].value - minNoConcernLength;
+                }
+            }
+    
+            // Specifically allow "Low - mild concern" to collapse to zero-width, in both directions
+            if (levels[threshold.levelIndex].label === 'Low - mild concern') {
+                if (index > 0 && threshold.value <= thresholds[index - 1].value) {
+                    threshold.value = thresholds[index - 1].value;
+                }
+                if (index < thresholds.length - 1 && threshold.value >= thresholds[index + 1].value) {
+                    threshold.value = thresholds[index + 1].value;
+                }
+            }
         }
-    }
-
-    // Enforce minimum length for "No concern" when adjusting the boundary from the right (prevent reducing its width)
-    if (index < thresholds.length - 1 && levels[thresholds[index].levelIndex].label === 'No concern') {
-        if (threshold.value + minNoConcernLength > thresholds[index + 1].value) {
-            threshold.value = thresholds[index + 1].value - minNoConcernLength;
-        }
-    }
-
-    // Specifically allow "Low - mild concern" to collapse to zero-width, in both directions
-    if (levels[threshold.levelIndex].label === 'Low - mild concern') {
-        // Allow zero-width collapse from left to right
-        if (index > 0 && threshold.value <= thresholds[index - 1].value) {
-            threshold.value = thresholds[index - 1].value; // Allow collapse by aligning with the previous threshold
-        }
-        // Allow zero-width collapse from right to left
-        if (index < thresholds.length - 1 && threshold.value >= thresholds[index + 1].value) {
-            threshold.value = thresholds[index + 1].value; // Allow collapse by aligning with the next threshold
-        }
-    }
-}
-
-function updatePositions() {
-    // Update thumbs and labels
-    thresholds.forEach((threshold, index) => {
-        if (index > 0 && index < thresholds.length - 1) {
-            const thumb = thumbs[index - 1];
-            const thumbLabel = thumbLabels[index - 1];
-            const percent = ((threshold.value - min) / (max - min)) * 100;
-
-            // Always show thumb and label
-            thumb.style.display = 'block';
-            thumb.style.left = `${percent}%`;
-            thumb.style.transform = 'translateX(-50%)';
-
-            thumbLabel.style.display = 'block';
-            thumbLabel.style.left = `${percent}%`;
-            thumbLabel.style.transform = 'translateX(-50%)';
-
-            // Show adjusted lower bound value for label (add 1 except for the first threshold)
-            const displayValue = index === 1 ? threshold.value : threshold.value + 1;
-            thumbLabel.textContent = formatValue(displayValue, vitalSign);
-
-            // Adjust appearance if section is hidden
-            thumb.style.opacity = '1';
-            thumbLabel.style.opacity = '1';
-        }
-    });
-
-    // Update ranges
-    const visibleRanges = [];
-    let lastVisibleValue = min;
-
-    for (let i = 1; i < thresholds.length; i++) {
-        // Only add ranges with non-zero width or "No concern" group
-        if (thresholds[i].value !== lastVisibleValue || levels[thresholds[i - 1].levelIndex].label === 'No concern') {
-            visibleRanges.push({
-                start: lastVisibleValue,
-                end: thresholds[i].value,
-                levelIndex: Math.max(0, Math.min(levels.length - 1, thresholds[i - 1].levelIndex))
+    
+        function updatePositions() {
+            // Update thumbs and labels
+            thresholds.forEach((threshold, index) => {
+                if (index > 0 && index < thresholds.length - 1) {
+                    const thumb = thumbs[index - 1];
+                    const percent = ((threshold.value - min) / (max - min)) * 100;
+    
+                    // Always show thumb
+                    thumb.style.display = 'block';
+                    thumb.style.left = `${percent}%`;
+                    thumb.style.transform = 'translateX(-50%)';
+    
+                    // Adjust appearance if section is hidden
+                    thumb.style.opacity = '1';
+                }
             });
+    
+            // Update ranges
+            const visibleRanges = [];
+            let lastVisibleValue = min;
+    
+            for (let i = 1; i < thresholds.length; i++) {
+                if (thresholds[i].value !== lastVisibleValue || levels[thresholds[i - 1].levelIndex].label === 'No concern') {
+                    visibleRanges.push({
+                        start: lastVisibleValue,
+                        end: thresholds[i].value,
+                        levelIndex: Math.max(0, Math.min(levels.length - 1, thresholds[i - 1].levelIndex))
+                    });
+                }
+                lastVisibleValue = thresholds[i].value;
+            }
+    
+            ranges.forEach(range => range.remove());
+            ranges.length = 0;
+    
+            visibleRanges.forEach((rangeData) => {
+                if (rangeData.start !== rangeData.end || levels[rangeData.levelIndex].label === 'No concern') {
+                    const startPercent = ((rangeData.start - min) / (max - min)) * 100;
+                    const endPercent = ((rangeData.end - min) / (max - min)) * 100;
+                    const width = endPercent - startPercent;
+    
+                    const range = document.createElement('div');
+                    range.className = 'range';
+                    range.style.left = `${startPercent}%`;
+                    range.style.width = `${width}%`;
+                    range.style.backgroundColor = levels[rangeData.levelIndex].color;
+                    range.style.position = 'absolute';
+                    range.style.height = '20px';
+                    scaleContainer.appendChild(range);
+                    ranges.push(range);
+                }
+            });
+    
+            updateTickMarksColor();
+            updateThresholdTable(visibleRanges);
         }
-        lastVisibleValue = thresholds[i].value;
-    }
-
-    // Clear existing ranges
-    ranges.forEach(range => range.remove());
-    ranges.length = 0;
-
-    // Create new ranges without changing the colors of remaining sections
-    visibleRanges.forEach((rangeData) => {
-        if (rangeData.start !== rangeData.end || levels[rangeData.levelIndex].label === 'No concern') { // Only create ranges with non-zero width or "No concern"
-            const startPercent = ((rangeData.start - min) / (max - min)) * 100;
-            const endPercent = ((rangeData.end - min) / (max - min)) * 100;
-            const width = endPercent - startPercent;
-
-            const range = document.createElement('div');
-            range.className = 'range';
-            range.style.left = `${startPercent}%`;
-            range.style.width = `${width}%`;
-            range.style.backgroundColor = levels[rangeData.levelIndex].color;
-            range.style.position = 'absolute';
-            range.style.height = '20px';
-            scaleContainer.appendChild(range);
-            ranges.push(range);
-        }
-    });
-
-    updateTickMarksColor();
-    updateThresholdTable(visibleRanges);
-}
-
     
         function updateThresholdTable(visibleRanges) {
-    tableBody.innerHTML = '';
-
-    visibleRanges.forEach((range, index) => {
-        if (range.start !== range.end || levels[range.levelIndex].label === 'No concern') { // Only add rows for ranges with non-zero width or "No concern"
-            const row = document.createElement('tr');
-            const levelCell = document.createElement('td');
-            levelCell.textContent = levels[range.levelIndex].label;
-
-            const lowerCell = document.createElement('td');
-            // Add 0.1 to the lower bound for Temperature, otherwise add 1
-            lowerCell.textContent = formatValue(
-                index === 0 ? range.start : range.start + (vitalSign.name === "Temperature" ? 0.1 : 1),
-                vitalSign
-            );
-
-            const upperCell = document.createElement('td');
-            upperCell.textContent = formatValue(range.end, vitalSign);
-
-            row.appendChild(levelCell);
-            row.appendChild(lowerCell);
-            row.appendChild(upperCell);
-            tableBody.appendChild(row);
+            tableBody.innerHTML = '';
+    
+            visibleRanges.forEach((range, index) => {
+                if (range.start !== range.end || levels[range.levelIndex].label === 'No concern') {
+                    const row = document.createElement('tr');
+                    const levelCell = document.createElement('td');
+                    levelCell.textContent = levels[range.levelIndex].label;
+    
+                    const lowerCell = document.createElement('td');
+                    lowerCell.textContent = formatValue(
+                        index === 0 ? range.start : range.start + (vitalSign.name === "Temperature" ? 0.1 : 1),
+                        vitalSign
+                    );
+    
+                    const upperCell = document.createElement('td');
+                    upperCell.textContent = formatValue(range.end, vitalSign);
+    
+                    row.appendChild(levelCell);
+                    row.appendChild(lowerCell);
+                    row.appendChild(upperCell);
+                    tableBody.appendChild(row);
+                }
+            });
         }
-    });
-}
-
-        
     
         function formatValue(value, vitalSign) {
             const decimals = getMaxDecimalDigits(vitalSign.step);
@@ -305,42 +285,42 @@ function updatePositions() {
             if (vitalSign.name === "Oxygen Saturation") {
                 switch (index) {
                     case 1:
-                        return { thumbClass: 'thumb-severe', thumbLabelClass: 'thumb-label-severe' };
+                        return { thumbClass: 'thumb-severe' };
                     case 2:
-                        return { thumbClass: 'thumb-moderate', thumbLabelClass: 'thumb-label-moderate' };
+                        return { thumbClass: 'thumb-moderate' };
                     case 3:
-                        return { thumbClass: 'thumb-mild', thumbLabelClass: 'thumb-label-mild' };
+                        return { thumbClass: 'thumb-mild' };
                     default:
-                        return { thumbClass: '', thumbLabelClass: '' };
+                        return { thumbClass: '' };
                 }
             } else if (vitalSign.name.startsWith("Inspired Oxygen")) {
                 switch (index) {
                     case 1:
-                        return { thumbClass: 'thumb-mild', thumbLabelClass: 'thumb-label-mild' };
+                        return { thumbClass: 'thumb-mild' };
                     case 2:
-                        return { thumbClass: 'thumb-moderate', thumbLabelClass: 'thumb-label-moderate' };
+                        return { thumbClass: 'thumb-moderate' };
                     case 3:
-                        return { thumbClass: 'thumb-severe', thumbLabelClass: 'thumb-label-severe' };
+                        return { thumbClass: 'thumb-severe' };
                     default:
-                        return { thumbClass: '', thumbLabelClass: '' };
+                        return { thumbClass: '' };
                 }
             }
             else {
                 switch (index) {
                     case 1:
-                        return { thumbClass: 'thumb-severe', thumbLabelClass: 'thumb-label-severe' };
+                        return { thumbClass: 'thumb-severe' };
                     case 2:
-                        return { thumbClass: 'thumb-moderate', thumbLabelClass: 'thumb-label-moderate' };
+                        return { thumbClass: 'thumb-moderate' };
                     case 3:
-                        return { thumbClass: 'thumb-mild', thumbLabelClass: 'thumb-label-mild' };
+                        return { thumbClass: 'thumb-mild' };
                     case 4:
-                        return { thumbClass: 'thumb-mild', thumbLabelClass: 'thumb-label-mild' };
+                        return { thumbClass: 'thumb-mild' };
                     case 5:
-                        return { thumbClass: 'thumb-moderate', thumbLabelClass: 'thumb-label-moderate' };
+                        return { thumbClass: 'thumb-moderate' };
                     case 6:
-                        return { thumbClass: 'thumb-severe', thumbLabelClass: 'thumb-label-severe' };
+                        return { thumbClass: 'thumb-severe' };
                     default:
-                        return { thumbClass: '', thumbLabelClass: '' };
+                        return { thumbClass: '' };
                 }
             }
         }
@@ -355,7 +335,6 @@ function updatePositions() {
             }
         }
     
-        // Initialize thresholds with random positions
         function initializeThresholds() {
             thresholds = [{ value: min, levelIndex: 0 }];
     
@@ -368,31 +347,22 @@ function updatePositions() {
             thresholds.push({ value: max, levelIndex: levels.length - 1 });
         }
     
-        // Function to generate random positions for the arrows
         function getRandomPositions(numArrows, min, max, step) {
             const positions = [];
     
-            // Divide the range into (numArrows + 1) segments
             const segmentSize = (max - min) / (numArrows + 1);
     
             for (let i = 0; i < numArrows; i++) {
-                // Define segment boundaries
                 const segmentMin = min + i * segmentSize;
                 const segmentMax = min + (i + 1) * segmentSize;
     
-                // Generate a random value within the segment
                 let randomValue = segmentMin + Math.random() * (segmentMax - segmentMin);
-    
-                // Snap to nearest step
                 randomValue = Math.round(randomValue / step) * step;
-    
-                // Ensure value is within segment boundaries after snapping
                 randomValue = Math.max(segmentMin, Math.min(randomValue, segmentMax));
     
                 positions.push(randomValue);
             }
     
-            // Sort positions to ensure they are in order
             return positions.sort((a, b) => a - b);
         }
     
@@ -401,7 +371,6 @@ function updatePositions() {
                 .filter((t, index) => {
                     const prevValue = thresholds[index].value;
                     const nextValue = thresholds[index + 2].value;
-                    // Exclude thresholds that have same value as previous or next (zero-width ranges)
                     return (
                         t.value !== prevValue &&
                         t.value !== nextValue
@@ -410,17 +379,14 @@ function updatePositions() {
                 .map(t => formatValue(t.value, vitalSign));
         };
     
-        // Save thresholds to vitalSign object for later retrieval
         vitalSign.thresholds = thresholds;
     
-        // Function to load saved data
         function loadSavedData() {
             const savedData = JSON.parse(sessionStorage.getItem('part1Data'));
             if (savedData && savedData.thresholds) {
                 const vitalSignData = savedData.thresholds.find(v => v['Vital Sign'] === vitalSign.name);
                 if (vitalSignData && vitalSignData.Values) {
                     const savedValues = vitalSignData.Values.split(';').map(v => parseFloat(v));
-                    // Reconstruct thresholds based on saved values
                     thresholds = [{ value: min, levelIndex: 0 }];
     
                     savedValues.forEach((val, idx) => {
@@ -441,7 +407,6 @@ function updatePositions() {
             }
         }
     
-        // Create tick marks
         function createTickMarks() {
             const numTicks = Math.floor((max - min) / vitalSign.majorTick) + 1;
             const tickContainer = document.createElement('div');
@@ -476,14 +441,12 @@ function updatePositions() {
                 ticks.push({ tick, value });
             }
     
-            // Create smaller ticks in between the major ticks
-            const minorTickInterval = vitalSign.majorTick / 5; // Smaller ticks between major ticks
+            const minorTickInterval = vitalSign.majorTick / 5;
             const numMinorTicks = Math.floor((max - min) / minorTickInterval);
             for (let i = 0; i < numMinorTicks; i++) {
                 const minorTickValue = min + i * minorTickInterval;
                 const percent = ((minorTickValue - min) / (max - min)) * 100;
     
-                // Skip if it's a major tick value
                 if (i % 5 === 0) {
                     continue;
                 }
@@ -508,15 +471,10 @@ function updatePositions() {
             });
         }
     
-        // Create thumbs
         function createThumbs() {
-            // Remove existing thumbs and labels
             thumbs.forEach(thumb => thumb.remove());
-            thumbLabels.forEach(label => label.remove());
             thumbs.length = 0;
-            thumbLabels.length = 0;
     
-            // For each threshold between min and max, create a thumb
             for (let i = 1; i < thresholds.length - 1; i++) {
                 const threshold = thresholds[i];
     
@@ -524,27 +482,14 @@ function updatePositions() {
                 thumb.className = 'thumb';
                 thumb.style.position = 'absolute';
     
-                const thumbLabel = document.createElement('div');
-                thumbLabel.className = 'thumb-label';
-                thumbLabel.style.position = 'absolute';
-    
-                // Add level-specific classes
                 const arrowLevel = getArrowLevel(i, vitalSign);
                 if (arrowLevel.thumbClass) {
                     thumb.classList.add(arrowLevel.thumbClass);
                 }
-                if (arrowLevel.thumbLabelClass) {
-                    thumbLabel.classList.add(arrowLevel.thumbLabelClass);
-                }
     
-                // Add thumb to scaleContainer
                 scaleContainer.appendChild(thumb);
-                scaleContainer.appendChild(thumbLabel);
-    
                 thumbs.push(thumb);
-                thumbLabels.push(thumbLabel);
     
-                // Add event listeners for dragging
                 let isDragging = false;
     
                 thumb.addEventListener('mousedown', (event) => {
@@ -558,9 +503,7 @@ function updatePositions() {
                         let percent = ((event.clientX - rect.left) / rect.width) * 100;
                         percent = Math.max(0, Math.min(100, percent));
     
-                        // Convert percent to value
                         let value = min + (percent / 100) * (max - min);
-                        // Snap to step
                         value = Math.round(value / vitalSign.step) * vitalSign.step;
                         threshold.value = value;
     
@@ -577,7 +520,6 @@ function updatePositions() {
             updatePositions();
         }
     
-        // Create table for displaying thresholds
         const table = document.createElement('table');
         table.className = 'threshold-table';
     
@@ -602,7 +544,6 @@ function updatePositions() {
     
         container.appendChild(table);
     
-        // Initialize the vital sign element
         createTickMarks();
         loadSavedData();
     
@@ -620,10 +561,8 @@ function updatePositions() {
     
     if (submitButton) {
         submitButton.addEventListener('click', () => {
-            // Collect data and store it in sessionStorage
             collectData();
             alert('Your responses have been saved. Please proceed to Part 2.');
-            // Navigate to the next page
             window.location.href = 'part2.html';
         });
     } else {
@@ -643,11 +582,10 @@ function updatePositions() {
             });
         });
     
-        // Save data to sessionStorage
         sessionStorage.setItem('part1Data', JSON.stringify(data));
     
         console.log('Data collected and saved to sessionStorage:', data);
     
         return data;
     }
-});  
+});
