@@ -220,30 +220,32 @@ function updatePositions() {
 
     
         function updateThresholdTable(visibleRanges) {
-            tableBody.innerHTML = '';
-        
-            visibleRanges.forEach((range, index) => {
-                if (range.start !== range.end || levels[range.levelIndex].label === 'No concern') { // Only add rows for ranges with non-zero width or "No concern"
-                    const row = document.createElement('tr');
-                    const levelCell = document.createElement('td');
-                    levelCell.textContent = levels[range.levelIndex].label;
-        
-                    const lowerCell = document.createElement('td');
-                    lowerCell.textContent = formatValue(
-                        index === 0 ? range.start : range.start + 1, // Add 1 to lower bound except for the first row
-                        vitalSign
-                    );
-        
-                    const upperCell = document.createElement('td');
-                    upperCell.textContent = formatValue(range.end, vitalSign);
-        
-                    row.appendChild(levelCell);
-                    row.appendChild(lowerCell);
-                    row.appendChild(upperCell);
-                    tableBody.appendChild(row);
-                }
-            });
+    tableBody.innerHTML = '';
+
+    visibleRanges.forEach((range, index) => {
+        if (range.start !== range.end || levels[range.levelIndex].label === 'No concern') { // Only add rows for ranges with non-zero width or "No concern"
+            const row = document.createElement('tr');
+            const levelCell = document.createElement('td');
+            levelCell.textContent = levels[range.levelIndex].label;
+
+            const lowerCell = document.createElement('td');
+            // Add 0.1 to the lower bound for Temperature, otherwise add 1
+            lowerCell.textContent = formatValue(
+                index === 0 ? range.start : range.start + (vitalSign.name === "Temperature" ? 0.1 : 1),
+                vitalSign
+            );
+
+            const upperCell = document.createElement('td');
+            upperCell.textContent = formatValue(range.end, vitalSign);
+
+            row.appendChild(levelCell);
+            row.appendChild(lowerCell);
+            row.appendChild(upperCell);
+            tableBody.appendChild(row);
         }
+    });
+}
+
         
     
         function formatValue(value, vitalSign) {
