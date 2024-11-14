@@ -656,3 +656,4 @@ document.addEventListener('DOMContentLoaded', () => {
         return data;
     }
 });
+// ToDO: fix missing teeth on the scale and other issue from email
