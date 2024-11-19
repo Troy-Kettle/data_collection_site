@@ -116,34 +116,37 @@ document.addEventListener('DOMContentLoaded', () => {
                 threshold.value = Math.min(thresholds[index + 1].value, threshold.value);
             }
         
-            // Set minimum length based on the vital sign (0.1 for Temperature, 1 for others)
-            const minNoConcernLength = (vitalSign.step === 0.1) ? 0.1 : 1;
+            // Set minimum length based on the vital sign
+            let minNoConcernLength;
+            if (vitalSign.name === "Temperature") {
+                minNoConcernLength = 0.1;
+            } else if (vitalSign.name.startsWith("Inspired Oxygen")) {
+                minNoConcernLength = 1; // Enforce minimum of 1 unit for Inspired Oxygen
+            } else {
+                minNoConcernLength = 1;
+            }
         
-            // Enforce minimum length for "No concern" when adjusting the boundary from the left (prevent reducing its width)
-            // Allow zero-width for Inspired Oxygen "No concern" only
+            // Enforce minimum length for "No concern" when adjusting from the left
             if (
                 index > 0 &&
-                levels[thresholds[index - 1].levelIndex].label === 'No concern' &&
-                !vitalSign.name.startsWith("Inspired Oxygen")
+                levels[thresholds[index - 1].levelIndex].label === 'No concern'
             ) {
                 if (threshold.value < thresholds[index - 1].value + minNoConcernLength) {
                     threshold.value = thresholds[index - 1].value + minNoConcernLength;
                 }
             }
         
-            // Enforce minimum length for "No concern" when adjusting the boundary from the right (prevent reducing its width)
-            // Allow zero-width for Inspired Oxygen "No concern" only
+            // Enforce minimum length for "No concern" when adjusting from the right
             if (
                 index < thresholds.length - 1 &&
-                levels[thresholds[index].levelIndex].label === 'No concern' &&
-                !vitalSign.name.startsWith("Inspired Oxygen")
+                levels[thresholds[index].levelIndex].label === 'No concern'
             ) {
                 if (threshold.value + minNoConcernLength > thresholds[index + 1].value) {
                     threshold.value = thresholds[index + 1].value - minNoConcernLength;
                 }
             }
         
-            // Specifically allow "Low - mild concern" to collapse to zero-width, in both directions
+            // Specifically allow "Low - mild concern" to collapse to zero width
             if (levels[threshold.levelIndex].label === 'Low - mild concern') {
                 if (index > 0 && threshold.value <= thresholds[index - 1].value) {
                     threshold.value = thresholds[index - 1].value;
@@ -153,6 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
+        
         
     
         function updatePositions() {
