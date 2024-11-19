@@ -443,21 +443,58 @@ document.addEventListener('DOMContentLoaded', () => {
             tickContainer.style.position = 'relative';
             tickContainer.style.height = '20px';
             scaleContainer.appendChild(tickContainer);
-    
-            // Always add a tick at min
-            if (min <= max) {
-                const isMajorTick = (min % vitalSign.majorTick === 0);
+        
+            ticks.length = 0; // clear previous ticks if any
+        
+            // Adjust minor tick interval specifically for Temperature
+            let minorTickInterval = vitalSign.majorTick / 5;
+            if (vitalSign.name === "Temperature") {
+                minorTickInterval = 0.2; // Set minor ticks every 0.2 degrees
+            }
+        
+            const decimals = getMaxDecimalDigits(vitalSign.step);
+        
+            // Generate major ticks
+            const majorTicks = [];
+            let majorTickStart = Math.ceil(min / vitalSign.majorTick) * vitalSign.majorTick;
+            if (min % vitalSign.majorTick === 0) {
+                majorTickStart = min;
+            }
+            for (let value = majorTickStart; value <= max; value += vitalSign.majorTick) {
+                value = parseFloat(value.toFixed(decimals));
+                majorTicks.push(value);
+            }
+        
+            // Generate minor ticks
+            const minorTicks = [];
+            let minorTickStart = Math.ceil(min / minorTickInterval) * minorTickInterval;
+            if (min % minorTickInterval === 0) {
+                minorTickStart = min;
+            }
+            for (let value = minorTickStart; value <= max; value += minorTickInterval) {
+                value = parseFloat(value.toFixed(decimals));
+                if (!majorTicks.includes(value)) {
+                    minorTicks.push(value);
+                }
+            }
+        
+            // Draw ticks
+            const allTicks = [...majorTicks, ...minorTicks];
+            allTicks.sort((a, b) => a - b);
+        
+            allTicks.forEach(value => {
+                const isMajorTick = majorTicks.includes(value);
                 const tick = document.createElement('div');
                 tick.className = isMajorTick ? 'tick' : 'minor-tick';
                 tick.style.position = 'absolute';
                 tick.style.height = isMajorTick ? '10px' : '5px';
                 tick.style.width = '1px';
-                tick.style.backgroundColor = '#999';
-    
-                const percent = 0; // min is at 0%
+                tick.style.backgroundColor = isMajorTick ? '#999' : '#ccc';
+        
+                const percent = ((value - min) / (max - min)) * 100;
                 tick.style.left = `${percent}%`;
                 tick.style.transform = 'translateX(-50%)';
-    
+        
                 if (isMajorTick) {
                     const tickLabel = document.createElement('span');
                     tickLabel.className = 'tick-label';
@@ -465,71 +502,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     tickLabel.style.top = '15px';
                     tickLabel.style.left = `${percent}%`;
                     tickLabel.style.transform = 'translateX(-50%)';
-                    tickLabel.textContent = formatValue(min, vitalSign);
+                    tickLabel.textContent = formatValue(value, vitalSign);
                     tickContainer.appendChild(tickLabel);
                 }
-    
+        
                 tickContainer.appendChild(tick);
-                ticks.push({ tick, value: min });
-            }
-    
-            // Calculate starting tick for major ticks
-            let startingTick = min % vitalSign.majorTick === 0 ? min : min + (vitalSign.majorTick - (min % vitalSign.majorTick));
-    
-            // For "Inspired Oxygen -", unit "%"
-            if (vitalSign.name.startsWith("Inspired Oxygen") && vitalSign.unit === "%") {
-                startingTick = Math.ceil(min / vitalSign.majorTick) * vitalSign.majorTick;
-            }
-    
-            // Draw major ticks
-            for (let value = startingTick; value <= max; value += vitalSign.majorTick) {
-                const tick = document.createElement('div');
-                tick.className = 'tick';
-                tick.style.position = 'absolute';
-                tick.style.height = '10px';
-                tick.style.width = '1px';
-                tick.style.backgroundColor = '#999';
-    
-                const percent = ((value - min) / (max - min)) * 100;
-                tick.style.left = `${percent}%`;
-                tick.style.transform = 'translateX(-50%)';
-    
-                const tickLabel = document.createElement('span');
-                tickLabel.className = 'tick-label';
-                tickLabel.style.position = 'absolute';
-                tickLabel.style.top = '15px';
-                tickLabel.style.left = `${percent}%`;
-                tickLabel.style.transform = 'translateX(-50%)';
-                tickLabel.textContent = formatValue(value, vitalSign);
-    
-                tickContainer.appendChild(tick);
-                tickContainer.appendChild(tickLabel);
                 ticks.push({ tick, value });
-            }
-    
-            // Add minor ticks
-            const minorTickInterval = vitalSign.majorTick / 5;
-    
-            for (let value = min + vitalSign.step; value < max; value += vitalSign.step) {
-                // Skip positions where major ticks are drawn
-                if ((value - min) % vitalSign.majorTick === 0) continue;
-                // Skip if a minor tick is already at min
-                if (value === min) continue;
-                // Draw minor ticks at intervals of minorTickInterval
-                if ((value - min) % minorTickInterval === 0) {
-                    const percent = ((value - min) / (max - min)) * 100;
-                    const minorTick = document.createElement('div');
-                    minorTick.className = 'minor-tick';
-                    minorTick.style.position = 'absolute';
-                    minorTick.style.height = '5px';
-                    minorTick.style.width = '1px';
-                    minorTick.style.backgroundColor = '#ccc';
-                    minorTick.style.left = `${percent}%`;
-                    minorTick.style.transform = 'translateX(-50%)';
-                    tickContainer.appendChild(minorTick);
-                }
-            }
+            });
         }
+        
     
         function updateTickMarksColor() {
             ticks.forEach(({ tick, value }) => {
