@@ -109,12 +109,22 @@ document.addEventListener('DOMContentLoaded', () => {
             threshold.value = Math.max(min, Math.min(threshold.value, max));
         
             if (vitalSign.name.startsWith("Inspired Oxygen")) {
-                // Allow ranges to collapse to 0 but prevent thresholds from crossing
+                // Set a very long minimum length for "No concern"
+                let minNoConcernLength = 5; // Setting minimum length for "No concern" to extend further into the slider
+                
+                // Prevent thresholds from crossing
                 if (index > 0) {
                     threshold.value = Math.max(thresholds[index - 1].value, threshold.value);
                 }
                 if (index < thresholds.length - 1) {
                     threshold.value = Math.min(thresholds[index + 1].value, threshold.value);
+                }
+        
+                // Ensure the "No concern" section has a significant minimum length
+                if (index === 1 && levels[threshold.levelIndex].label === 'No concern') {
+                    if (threshold.value < thresholds[index - 1].value + minNoConcernLength) {
+                        threshold.value = thresholds[index - 1].value + minNoConcernLength;
+                    }
                 }
                 return; // Skip further enforcement for Inspired Oxygen
             }
@@ -165,52 +175,66 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
-        
-        
-        
-        
-    
+                
+
         function updatePositions() {
             // Update thumbs and labels
             thresholds.forEach((threshold, index) => {
                 if (index > 0 && index < thresholds.length - 1) {
                     const thumb = thumbs[index - 1];
                     const percent = ((threshold.value - min) / (max - min)) * 100;
-    
+        
                     // Always show thumb
                     thumb.style.display = 'block';
                     thumb.style.left = `${percent}%`;
                     thumb.style.transform = 'translateX(-50%)';
-    
+        
                     // Adjust appearance if section is hidden
                     thumb.style.opacity = '1';
                 }
             });
-    
+        
             // Update ranges
             const visibleRanges = [];
             let lastVisibleValue = min;
-    
+        
             for (let i = 1; i < thresholds.length; i++) {
-                if (thresholds[i].value !== lastVisibleValue || levels[thresholds[i - 1].levelIndex].label === 'No concern') {
+                const currentThreshold = thresholds[i].value;
+                const previousThreshold = thresholds[i - 1].value;
+        
+                let start = lastVisibleValue;
+                let end = currentThreshold;
+        
+                // Ensure at least minimal width for "No concern" in Inspired Oxygen
+                if (
+                    vitalSign.name.startsWith("Inspired Oxygen") &&
+                    levels[thresholds[i - 1].levelIndex].label === 'No concern'
+                ) {
+                    const minNoConcernWidth = (vitalSign.step === 0.1 ? 0.1 : 1); // Adjust based on step
+                    if (end - start < minNoConcernWidth) {
+                        end = start + minNoConcernWidth;
+                    }
+                }
+        
+                if (end !== start || levels[thresholds[i - 1].levelIndex].label === 'No concern') {
                     visibleRanges.push({
-                        start: lastVisibleValue,
-                        end: thresholds[i].value,
-                        levelIndex: Math.max(0, Math.min(levels.length - 1, thresholds[i - 1].levelIndex))
+                        start,
+                        end,
+                        levelIndex: Math.max(0, Math.min(levels.length - 1, thresholds[i - 1].levelIndex)),
                     });
                 }
-                lastVisibleValue = thresholds[i].value;
+                lastVisibleValue = currentThreshold;
             }
-    
+        
             ranges.forEach(range => range.remove());
             ranges.length = 0;
-    
+        
             visibleRanges.forEach((rangeData) => {
                 if (rangeData.start !== rangeData.end || levels[rangeData.levelIndex].label === 'No concern') {
                     const startPercent = ((rangeData.start - min) / (max - min)) * 100;
                     const endPercent = ((rangeData.end - min) / (max - min)) * 100;
                     const width = endPercent - startPercent;
-    
+        
                     const range = document.createElement('div');
                     range.className = 'range';
                     range.style.left = `${startPercent}%`;
@@ -222,10 +246,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     ranges.push(range);
                 }
             });
-    
+        
             updateTickMarksColor();
             updateThresholdTable(visibleRanges);
         }
+        
+        
     
         function updateThresholdTable(visibleRanges) {
             tableBody.innerHTML = '';
@@ -652,4 +678,5 @@ document.addEventListener('DOMContentLoaded', () => {
         return data;
     }
 });
-// ToDO: fix missing teeth on the scale and other issue from email
+
+
