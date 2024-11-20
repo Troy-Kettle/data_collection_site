@@ -109,9 +109,8 @@ document.addEventListener('DOMContentLoaded', () => {
             threshold.value = Math.max(min, Math.min(threshold.value, max));
         
             if (vitalSign.name.startsWith("Inspired Oxygen")) {
-                // Set a very long minimum length for "No concern"
-                let minNoConcernLength = 5; // Setting minimum length for "No concern" to extend further into the slider
-                
+                // Remove the minimum length enforcement for "No concern"
+        
                 // Prevent thresholds from crossing
                 if (index > 0) {
                     threshold.value = Math.max(thresholds[index - 1].value, threshold.value);
@@ -120,12 +119,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     threshold.value = Math.min(thresholds[index + 1].value, threshold.value);
                 }
         
-                // Ensure the "No concern" section has a significant minimum length
-                if (index === 1 && levels[threshold.levelIndex].label === 'No concern') {
-                    if (threshold.value < thresholds[index - 1].value + minNoConcernLength) {
-                        threshold.value = thresholds[index - 1].value + minNoConcernLength;
-                    }
-                }
                 return; // Skip further enforcement for Inspired Oxygen
             }
         
@@ -175,8 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
-                
-
+    
         function updatePositions() {
             // Update thumbs and labels
             thresholds.forEach((threshold, index) => {
@@ -205,15 +197,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 let start = lastVisibleValue;
                 let end = currentThreshold;
         
-                // Ensure at least minimal width for "No concern" in Inspired Oxygen
+                // For Inspired Oxygen, do not enforce minimal width
                 if (
                     vitalSign.name.startsWith("Inspired Oxygen") &&
                     levels[thresholds[i - 1].levelIndex].label === 'No concern'
                 ) {
-                    const minNoConcernWidth = (vitalSign.step === 0.1 ? 0.1 : 1); // Adjust based on step
-                    if (end - start < minNoConcernWidth) {
-                        end = start + minNoConcernWidth;
-                    }
+                    // Do not enforce minimal width
                 }
         
                 if (end !== start || levels[thresholds[i - 1].levelIndex].label === 'No concern') {
@@ -230,28 +219,35 @@ document.addEventListener('DOMContentLoaded', () => {
             ranges.length = 0;
         
             visibleRanges.forEach((rangeData) => {
-                if (rangeData.start !== rangeData.end || levels[rangeData.levelIndex].label === 'No concern') {
-                    const startPercent = ((rangeData.start - min) / (max - min)) * 100;
-                    const endPercent = ((rangeData.end - min) / (max - min)) * 100;
-                    const width = endPercent - startPercent;
-        
-                    const range = document.createElement('div');
-                    range.className = 'range';
-                    range.style.left = `${startPercent}%`;
+                const startPercent = ((rangeData.start - min) / (max - min)) * 100;
+                const endPercent = ((rangeData.end - min) / (max - min)) * 100;
+                let width = endPercent - startPercent;
+    
+                const range = document.createElement('div');
+                range.className = 'range';
+                range.style.position = 'absolute';
+                range.style.height = '20px';
+                range.style.backgroundColor = levels[rangeData.levelIndex].color;
+    
+                if (width === 0) {
+                    // Set minimal width
+                    width = 0.5; // Adjust as needed
                     range.style.width = `${width}%`;
-                    range.style.backgroundColor = levels[rangeData.levelIndex].color;
-                    range.style.position = 'absolute';
-                    range.style.height = '20px';
-                    scaleContainer.appendChild(range);
-                    ranges.push(range);
+                    range.style.left = `${startPercent}%`;
+                    range.style.transform = 'translateX(-50%)';
+                } else {
+                    range.style.width = `${width}%`;
+                    range.style.left = `${startPercent}%`;
+                    range.style.transform = 'none';
                 }
+    
+                scaleContainer.appendChild(range);
+                ranges.push(range);
             });
         
             updateTickMarksColor();
             updateThresholdTable(visibleRanges);
         }
-        
-        
     
         function updateThresholdTable(visibleRanges) {
             tableBody.innerHTML = '';
@@ -551,7 +547,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 ticks.push({ tick, value });
             });
         }
-        
     
         function updateTickMarksColor() {
             ticks.forEach(({ tick, value }) => {
@@ -678,5 +673,3 @@ document.addEventListener('DOMContentLoaded', () => {
         return data;
     }
 });
-
-
