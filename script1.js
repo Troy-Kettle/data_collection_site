@@ -108,6 +108,17 @@ document.addEventListener('DOMContentLoaded', () => {
             // Ensure thresholds stay within min and max
             threshold.value = Math.max(min, Math.min(threshold.value, max));
         
+            if (vitalSign.name.startsWith("Inspired Oxygen")) {
+                // Allow ranges to collapse to 0 but prevent thresholds from crossing
+                if (index > 0) {
+                    threshold.value = Math.max(thresholds[index - 1].value, threshold.value);
+                }
+                if (index < thresholds.length - 1) {
+                    threshold.value = Math.min(thresholds[index + 1].value, threshold.value);
+                }
+                return; // Skip further enforcement for Inspired Oxygen
+            }
+        
             // Ensure thresholds do not overlap, allowing zero-width ranges except for "No concern"
             if (index > 0 && levels[thresholds[index - 1].levelIndex].label !== 'No concern') {
                 threshold.value = Math.max(thresholds[index - 1].value, threshold.value);
@@ -120,8 +131,6 @@ document.addEventListener('DOMContentLoaded', () => {
             let minNoConcernLength;
             if (vitalSign.name === "Temperature") {
                 minNoConcernLength = 0.1;
-            } else if (vitalSign.name.startsWith("Inspired Oxygen")) {
-                minNoConcernLength = 1; // Enforce minimum of 1 unit for Inspired Oxygen
             } else {
                 minNoConcernLength = 1;
             }
@@ -156,6 +165,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
+        
+        
         
         
     
