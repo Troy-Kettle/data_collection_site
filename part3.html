@@ -4,8 +4,14 @@
     <meta charset="UTF-8">
     <title>Part 3: Further Interpretation of Vital Signs</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
+    <!-- Link to CSS Stylesheet -->
 
+
+    <!-- Include noUiSlider CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.6.3/nouislider.min.css">
+
+    <link rel="stylesheet" href="part3.css">
+    <!-- Firebase scripts -->
     <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-firestore-compat.js"></script>
 
@@ -19,14 +25,15 @@
             messagingSenderId: "171849859334",
             appId: "1:171849859334:web:c0c40fd8ca74a9e10e9e87",
             measurementId: "G-F2WDNKDP5R"
-          };
+        };
           
-          // Initialize Firebase
+        // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
     </script>
 </head>
 <body>
+    <!-- Navigation Bar -->
     <div class="navbar">
         <h1>Vital Signs Survey</h1>
         <ul>
@@ -36,6 +43,7 @@
         </ul>
     </div>
 
+    <!-- Container -->
     <div class="container">
         <div class="progress-bar">
             <h3 style="padding: 1%;">100%</h3>
@@ -49,9 +57,9 @@
         <ul>
             <li>When interpreting <em>(insert vital sign)</em>, how important is it to take account of:</li>
             <ul>
-            <li>What is normal for that individual patient.</li>
-            <li>Whether the general trend is worsening or improving.</li>
-            <li>Abnormal values that have occurred within the past 24 hours.</li>
+                <li>What is normal for that individual patient.</li>
+                <li>Whether the general trend is worsening or improving.</li>
+                <li>Abnormal values that have occurred within the past 24 hours.</li>
             </ul>
         </ul>
 
@@ -63,9 +71,11 @@
             </a>
             <button id="submitButton">Submit</button>
         </div>
-
-        <!-- Include JS file -->
-        <script src="script3.js"></script>
     </div>
+
+    <!-- Include noUiSlider JS before your script3.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.6.3/nouislider.min.js"></script>
+    <!-- Include your script3.js -->
+    <script src="script3.js"></script>
 </body>
 </html>
