@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
             reverseScale: true
         },
         {
-            name: "Inspired Oxygen -",
+            name: "Inspired Oxygen - (1)",
             unit: "L/min",
             min: 0,
             max: 15,
@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
             hasBothDirections: false
         },
         {
-            name: "Inspired Oxygen -",
+            name: "Inspired Oxygen - (2)",
             unit: "%",
             min: 21,
             max: 100,
@@ -658,11 +658,27 @@ document.addEventListener('DOMContentLoaded', () => {
         data.thresholds = [];
     
         vitalSignsData.forEach(vitalSign => {
-            const values = vitalSign.getValues();
+            const table = document.querySelector(`.threshold-table`); // Locate the table for the vital sign
+            const rows = table.querySelectorAll('tbody tr'); // Get all rows from the table body
+            const sections = [];
+    
+            rows.forEach(row => {
+                const level = row.querySelector('td:nth-child(1)').textContent; // Get the Level column
+                const lowerBound = row.querySelector('td:nth-child(2)').textContent; // Get the Lower Bound column
+                const upperBound = row.querySelector('td:nth-child(3)').textContent; // Get the Upper Bound column
+    
+                sections.push({
+                    level: level.trim(),
+                    start: lowerBound.trim(),
+                    end: upperBound.trim(),
+                    isActive: true // Default to true since it's displayed in the table
+                });
+            });
+    
             data.thresholds.push({
                 'Vital Sign': vitalSign.name,
                 'Unit': vitalSign.unit,
-                'Values': values.join(';')
+                'Sections': sections
             });
         });
     
