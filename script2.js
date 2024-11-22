@@ -116,7 +116,7 @@ const combinations = [
     }
 ];
 
-// Function to create a combination element with a dual-handle slider
+// Function to create a combination element with a single slider
 function createCombinationElement(combination, index) {
     const container = document.createElement('div');
     container.className = 'combination';
@@ -154,56 +154,36 @@ function createCombinationElement(combination, index) {
     table.appendChild(tbody);
     container.appendChild(table);
 
-    // Dual-handle Slider for rating (0 to 10)
+    // Create a slider input
     const sliderContainer = document.createElement('div');
     sliderContainer.className = 'slider-container';
 
     const sliderLabel = document.createElement('label');
-    sliderLabel.innerHTML = 'Select your level of concern interval:<br>0 = No more concerning <br>5 = Moderately more concerning<br>10 = Much more concerning';
+    sliderLabel.innerHTML = 'Select your level of concern:<br>0 = No more concerning <br>5 = Moderately more concerning<br>10 = Much more concerning';
     sliderContainer.appendChild(sliderLabel);
 
-    const sliderDiv = document.createElement('div');
-    sliderDiv.id = `slider-${index}`;
-    sliderDiv.className = 'dual-slider';
-    sliderContainer.appendChild(sliderDiv);
+    const slider = document.createElement('input');
+    slider.type = 'range';
+    slider.min = '0';
+    slider.max = '10';
+    slider.value = '5'; // Default value
+    slider.step = '1';
+    slider.className = 'slider';
+    slider.id = `slider-${index}`;
+    sliderContainer.appendChild(slider);
 
     const sliderValueDisplay = document.createElement('div');
     sliderValueDisplay.className = 'slider-values';
+    sliderValueDisplay.textContent = `Selected value: ${slider.value}`;
     sliderContainer.appendChild(sliderValueDisplay);
 
-    container.appendChild(sliderContainer);
-
-    // Initialize noUiSlider
-    noUiSlider.create(sliderDiv, {
-        start: [0, 10], // Starting positions of the two handles
-        connect: true,
-        step: 1,
-        range: {
-            'min': 0,
-            'max': 10
-        },
-        tooltips: [true, true], // Show tooltips above handles
-        format: {
-            to: function(value) {
-                return Math.round(value);
-            },
-            from: function(value) {
-                return Number(value);
-            }
-        }
-    });
-
-    // Load saved value if available
-    const savedData = JSON.parse(sessionStorage.getItem('part2Data'));
-    if (savedData && savedData[index]) {
-        sliderDiv.noUiSlider.set([savedData[index].LowerRating, savedData[index].UpperRating]);
-    }
-
-    // Update display and save data whenever the slider values change
-    sliderDiv.noUiSlider.on('update', (values) => {
-        sliderValueDisplay.textContent = `Selected range: ${values[0]} - ${values[1]}`;
+    // Update display and save data whenever the slider value changes
+    slider.addEventListener('input', () => {
+        sliderValueDisplay.textContent = `Selected value: ${slider.value}`;
         saveData();
     });
+
+    container.appendChild(sliderContainer);
 
     return container;
 }
@@ -212,22 +192,18 @@ function createCombinationElement(combination, index) {
 function collectData() {
     // Collect ratings from Part 2
     const part2Ratings = combinations.map((combination, index) => {
-        const sliderDiv = document.getElementById(`slider-${index}`);
-        if (sliderDiv && sliderDiv.noUiSlider) {
-            const values = sliderDiv.noUiSlider.get();
-            const lowerRating = values[0];
-            const upperRating = values[1];
+        const slider = document.getElementById(`slider-${index}`);
+        if (slider) {
+            const value = slider.value;
             return {
                 'Combination': index + 1,
-                'LowerRating': lowerRating,
-                'UpperRating': upperRating
+                'Rating': value
             };
         } else {
             console.error(`Slider for combination ${index + 1} not found.`);
             return {
                 'Combination': index + 1,
-                'LowerRating': null,
-                'UpperRating': null
+                'Rating': null
             };
         }
     });
