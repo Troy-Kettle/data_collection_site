@@ -29,7 +29,7 @@
 </head>
 <body>
     <div class="navbar">
-        <h1>Vital Signs Survey - Test</h1>
+        <h1>Vital Signs Survey</h1>
     </div>
     <div class="container">
         <h1>Welcome to the Vital Signs Survey</h1>
@@ -69,7 +69,7 @@
 
                 <!-- Screening Question 1 -->
                 <label for="experience">
-                    Are you a registered Doctor or Nurse with at least 2 years of clinical experience?
+                    Are you a registered Doctor (Registrar or Consultant level) or Nurse (Band 6 or above) who looks after acutely unwell adults in hospital as part of your usual job role?
                 </label>
                 <select id="experience" name="experience" required>
                     <option value="">--Select an option--</option>
@@ -95,38 +95,58 @@
                 </label>
                 <select id="role" name="role" required>
                     <option value="">--Select your role--</option>
-                    <option value="doctor">Doctor</option>
-                    <option value="nurse">Nurse</option>
-                    <option value="acp">Advanced Clinical Practitioner</option>
-                    <option value="specialist_nurse">Specialist Nurse</option>
+                    <option value="doctor">Registrar</option>
+                    <option value="nurse">Consultant</option>
+                    <option value="acp">Ward nurse</option>
+                    <option value="specialist_nurse">Specialist nurse</option>
                     <option value="cc_outreach_nurse">Critical Care Outreach Nurse</option>
+                    <option value="ACP">Advanced clinical practitioner</option>
                     <option value="hhn_coordinator">Hospital at Night coordinator</option>
                 </select>
                 <br>
 
                 <!-- Question 4 -->
-                <label for="specialty">
-                    Please indicate which best describes the specialty in which you currently work:
-                </label>
+                <label for="specialty">Please indicate which best describes the specialty in which you currently work:</label>
                 <select id="specialty" name="specialty" required>
                     <option value="">--Select your specialty--</option>
-                    <option value="medicine">Medicine</option>
-                    <option value="surgery">Surgery</option>
-                    <option value="critical_care">Critical Care</option>
+                    <option value="not_applicable">Not applicable</option>
+                    <option value="acute_medicine">Acute medicine</option>
+                    <option value="anaesthetics">Anaesthetics</option>
+                    <option value="cardio_thoracic_surgery">Cardio-thoracic surgery</option>
+                    <option value="cardiology">Cardiology</option>
+                    <option value="clinical_oncology">Clinical oncology</option>
+                    <option value="clinical_pharmacology">Clinical pharmacology and therapeutics</option>
+                    <option value="clinical_radiology">Clinical radiology</option>
+                    <option value="dermatology">Dermatology</option>
+                    <option value="emergency_medicine">Emergency medicine</option>
+                    <option value="endocrinology">Endocrinology and diabetes mellitus</option>
+                    <option value="gastroenterology">Gastroenterology</option>
+                    <option value="general_medicine">General (internal) medicine</option>
+                    <option value="general_surgery">General surgery</option>
+                    <option value="geriatric_medicine">Geriatric medicine</option>
+                    <option value="haematology">Haematology</option>
+                    <option value="hepatology">Hepatology</option>
+                    <option value="infectious_diseases">Infectious diseases</option>
+                    <option value="intensive_care">Intensive care medicine</option>
+                    <option value="medical_oncology">Medical oncology</option>
+                    <option value="neurology">Neurology</option>
+                    <option value="neurosurgery">Neurosurgery</option>
+                    <option value="obstetrics_gynaecology">Obstetrics and gynaecology</option>
+                    <option value="oral_surgery">Oral and maxillo-facial surgery</option>
+                    <option value="otolaryngology">Otolaryngology</option>
+                    <option value="palliative_medicine">Palliative medicine</option>
+                    <option value="plastic_surgery">Plastic surgery</option>
+                    <option value="rehabilitation">Rehabilitation medicine</option>
+                    <option value="renal_medicine">Renal medicine</option>
+                    <option value="respiratory_medicine">Respiratory medicine</option>
+                    <option value="rheumatology">Rheumatology</option>
+                    <option value="sport_medicine">Sport and exercise medicine</option>
+                    <option value="stroke_medicine">Stroke medicine</option>
+                    <option value="trauma_orthopaedics">Trauma and orthopaedic surgery</option>
+                    <option value="tropical_medicine">Tropical medicine</option>
+                    <option value="urology">Urology</option>
+                    <option value="vascular_surgery">Vascular surgery</option>
                     <option value="other">Other</option>
-                </select>
-                <br>
-
-                <!-- Question 5 -->
-                <label for="experience_years">
-                    How many years of clinical experience do you have?
-                </label>
-                <select id="experience_years" name="experience_years" required>
-                    <option value="">--Select your experience level--</option>
-                    <option value="2-5">2-5 years</option>
-                    <option value="6-10">6-10 years</option>
-                    <option value="11-15">11-15 years</option>
-                    <option value="greater_than_15">Greater than 15 years</option>
                 </select>
                 <br>
             </fieldset>
@@ -137,66 +157,45 @@
             </div>
         </form>
     </div>
-
     <script>
-        document.getElementById('consentForm').addEventListener('submit', async function(event) {
-            event.preventDefault(); // Prevent form from submitting
-
-            // Collect Consent Form Data
-            const consent1Element = document.querySelector('input[name="consent1"]');
-            const consent2Element = document.querySelector('input[name="consent2"]');
-            const consent3Element = document.querySelector('input[name="consent3"]');
-            
-            const consent1Checked = consent1Element ? consent1Element.checked : null;
-            const consent2Checked = consent2Element ? consent2Element.checked : null;
-            const consent3Checked = consent3Element ? consent3Element.checked : null;
-
-            if (consent1Checked === null || consent2Checked === null || consent3Checked === null) {
-                console.error('Error: One or more consent checkboxes are not found.');
-                alert('Please make sure you have agreed to all consent items.');
-                return; // Don't proceed if the consent checkboxes are not available
+        document.getElementById('consentForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+        
+            // Get all required fields
+            const consent1 = document.querySelector('input[name="consent1"]').checked;
+            const consent2 = document.querySelector('input[name="consent2"]').checked;
+            const consent3 = document.querySelector('input[name="consent3"]').checked;
+            const experience = document.getElementById('experience').value;
+            const location = document.getElementById('location').value;
+            const role = document.getElementById('role').value;
+            const specialty = document.getElementById('specialty').value;
+        
+            // Check if all fields are filled
+            if (consent1 && consent2 && consent3 && experience && location && role && specialty) {
+                // Save the data
+                const consentData = {
+                    consent1: 'Consented',
+                    consent2: 'Consented',
+                    consent3: 'Consented'
+                };
+        
+                const basicInfoData = {
+                    experience: experience,
+                    location: location,
+                    role: role,
+                    specialty: specialty
+                };
+        
+                // Save to sessionStorage
+                sessionStorage.setItem('consentData', JSON.stringify(consentData));
+                sessionStorage.setItem('basicInfoData', JSON.stringify(basicInfoData));
+        
+                // Redirect to next page
+                window.location.href = '/part1.html';
+            } else {
+                alert('Please complete all required fields before proceeding.');
             }
-
-            const consentData = {
-                consent1: consent1Checked ? 'Consented' : 'Not Consented',
-                consent2: consent2Checked ? 'Consented' : 'Not Consented',
-                consent3: consent3Checked ? 'Consented' : 'Not Consented'
-            };
-
-            // Collect Screening Questions
-            const experienceElement = document.querySelector('select[name="experience"]');
-            const locationElement = document.querySelector('select[name="location"]');
-            const roleElement = document.querySelector('select[name="role"]');
-            const specialtyElement = document.querySelector('select[name="specialty"]');
-            const experienceYearsElement = document.querySelector('select[name="experience_years"]');
-
-            const experience = experienceElement ? experienceElement.value : null;
-            const location = locationElement ? locationElement.value : null;
-            const role = roleElement ? roleElement.value : null;
-            const specialty = specialtyElement ? specialtyElement.value : null;
-            const experience_years = experienceYearsElement ? experienceYearsElement.value : null;
-
-            // Check if all required fields are filled in
-            if (!experience || !location || !role || !specialty || !experience_years) {
-                alert('Please complete all required fields in the Basic Information section.');
-                return; // Don't proceed if any required field is missing
-            }
-
-            const basicInfoData = {
-                experience: experience,
-                location: location,
-                role: role,
-                specialty: specialty,
-                experience_years: experience_years
-            };
-
-            // Save consentData and basicInfoData to sessionStorage
-            sessionStorage.setItem('consentData', JSON.stringify(consentData));
-            sessionStorage.setItem('basicInfoData', JSON.stringify(basicInfoData));
-
-            // Now proceed to the next page
-            window.location.href = 'part1.html';
         });
-    </script>
+        </script>
 </body>
 </html>

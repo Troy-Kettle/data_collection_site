@@ -478,3 +478,307 @@ input[type="range"]::-moz-range-thumb:hover {
 .track {
     position: relative;
 }
+
+/* Slider specific styles */
+.slider-container {
+    margin-top: 40px;
+    position: relative;
+    padding-bottom: 50px; /* Increased to accommodate tick marks */
+}
+
+/* Custom range input styling */
+input[type="range"] {
+    margin-left: 0;
+    padding-left: 0;
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px;
+    border-radius: 5px;
+    background: linear-gradient(to right, #2ecc71, #e74c3c);
+    outline: none;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    margin-bottom: 30px; /* Increased to accommodate tick marks */
+}
+
+input[type="range"]:hover {
+    opacity: 1;
+}
+
+/* Custom thumb styling */
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--thumb-color, #3498db);
+    cursor: pointer;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    transition: background 0.3s ease;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: none;
+    background: var(--thumb-color, #3498db);
+    cursor: pointer;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    transition: background 0.3s ease;
+}
+
+/* Tick marks container */
+.tick-container {
+    position: absolute;
+    width: 100%;
+    height: 40px;
+    bottom: -10px;
+    left: 0;
+}
+
+/* Tick mark styling */
+.tick {
+    position: absolute;
+    width: 1px;
+    height: 8px;
+    background: #888;
+    transform: translateX(0%);
+}
+
+.tick.major {
+    height: 12px;
+    width: 2px;
+    background: #444;
+}
+
+/* Tick labels */
+.tick-label {
+    position: absolute;
+    transform: translateX(-50%);
+    font-size: 12px;
+    color: #666;
+    top: 14px;
+}
+
+.tick-label.major {
+    font-weight: bold;
+    color: #444;
+}
+
+/* Value display */
+.slider-values {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #333;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.scenario {
+    margin: 2rem 0;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+}
+
+.scenario h3 {
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.vital-signs-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+}
+
+.vital-signs-table th,
+.vital-signs-table td {
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+.vital-signs-table th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+}
+
+.vital-signs-table .vital-sign-label {
+    text-align: left;
+    font-weight: bold;
+    background-color: #f9f9f9;
+}
+
+.vital-signs-table tbody tr:nth-child(even) {
+    background-color: #fafafa;
+}
+
+.vital-signs-table tbody tr:hover {
+    background-color: #f0f0f0;
+}
+
+/* Scenario Styles */
+.scenario {
+    margin: 2rem 0;
+    padding: 2rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+}
+
+.scenario h3 {
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+/* Vital Signs Table Styles */
+.vital-signs-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+}
+
+.vital-signs-table th,
+.vital-signs-table td {
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+.vital-signs-table th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+}
+
+.vital-signs-table .vital-sign-label {
+    text-align: left;
+    font-weight: bold;
+    background-color: #f9f9f9;
+}
+
+.vital-signs-table tbody tr:nth-child(even) {
+    background-color: #fafafa;
+}
+
+.vital-signs-table tbody tr:hover {
+    background-color: #f0f0f0;
+}
+
+/* Importance Questions Styles */
+.importance-questions {
+    margin-top: 2rem;
+    padding: 1rem;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+}
+
+.importance-questions h4 {
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.importance-questions h5 {
+    margin-bottom: 1.5rem;
+    color: #666;
+    font-weight: normal;
+}
+
+.question {
+    margin-bottom: 2rem;
+}
+
+.question label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+.slider-container {
+    position: relative;
+    width: 100%;
+    padding: 1rem 0;
+}
+
+.slider {
+    width: 100%;
+    height: 8px;
+    -webkit-appearance: none;
+    background: transparent;
+    margin: 1rem 0;
+}
+
+.slider::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 8px;
+    background: #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: var(--thumb-color, #4CAF50);
+    cursor: pointer;
+    margin-top: -6px;
+}
+
+.tick-container {
+    position: relative;
+    width: 100%;
+    height: 20px;
+    margin-top: -10px;
+}
+
+.tick {
+    position: absolute;
+    width: 1px;
+    height: 5px;
+    background-color: #999;
+    transform: translateX(-50%);
+}
+
+.tick.major {
+    height: 10px;
+    width: 2px;
+    background-color: #666;
+}
+
+.tick-label {
+    position: absolute;
+    transform: translateX(-50%);
+    font-size: 0.8rem;
+    color: #666;
+    top: 12px;
+}
+
+.slider-values {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .vital-signs-table {
+        font-size: 0.8rem;
+    }
+
+    .vital-signs-table th,
+    .vital-signs-table td {
+        padding: 0.5rem;
+    }
+
+    .scenario {
+        padding: 1rem;
+    }
+}

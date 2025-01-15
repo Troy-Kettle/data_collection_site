@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
             reverseScale: true
         },
         {
-            name: "Inspired Oxygen - (1)",
+            name: "Supplementary oxygen",
             unit: "L/min",
             min: 0,
             max: 15,
@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
             hasBothDirections: false
         },
         {
-            name: "Inspired Oxygen - (2)",
+            name: "Inspired oxygen concentration",
             unit: "%",
             min: 21,
             max: 100,
@@ -292,37 +292,37 @@ document.addEventListener('DOMContentLoaded', () => {
         function getConcernLevels(vitalSign) {
             if (vitalSign.name === "Oxygen Saturation") {
                 return [
-                    { label: 'Low - severe concern', class: 'severe-concern', color: '#e74c3c' },
-                    { label: 'Low - moderate concern', class: 'moderate-concern', color: '#e67e22' },
-                    { label: 'Low - mild concern', class: 'mild-concern', color: '#f1c40f' },
+                    { label: 'Below normal - severe concern', class: 'severe-concern', color: '#e74c3c' },
+                    { label: 'Below normal - moderate concern', class: 'moderate-concern', color: '#e67e22' },
+                    { label: 'Below normal - mild concern', class: 'mild-concern', color: '#f1c40f' },
                     { label: 'No concern', class: 'no-concern', color: '#2ecc71' }
                 ];
             }
             else if (vitalSign.name.startsWith("Inspired Oxygen") && vitalSign.unit === "%") {
                 return [
                     { label: 'No concern', class: 'no-concern', color: '#2ecc71' },
-                    { label: 'High - mild concern', class: 'mild-concern', color: '#f1c40f' },
-                    { label: 'High - moderate concern', class: 'moderate-concern', color: '#e67e22' },
-                    { label: 'High - severe concern', class: 'severe-concern', color: '#e74c3c' }
+                    { label: 'Above normal - mild concern', class: 'mild-concern', color: '#f1c40f' },
+                    { label: 'Above normal - moderate concern', class: 'moderate-concern', color: '#e67e22' },
+                    { label: 'Above normal - severe concern', class: 'severe-concern', color: '#e74c3c' }
                 ];
             }
             else if (vitalSign.name.startsWith("Inspired Oxygen")) {
                 return [
                     { label: 'No concern', class: 'no-concern', color: '#2ecc71' },
-                    { label: 'High - mild concern', class: 'mild-concern', color: '#f1c40f' },
-                    { label: 'High - moderate concern', class: 'moderate-concern', color: '#e67e22' },
-                    { label: 'High - severe concern', class: 'severe-concern', color: '#e74c3c' }
+                    { label: 'Above normal - mild concern', class: 'mild-concern', color: '#f1c40f' },
+                    { label: 'Above normal - moderate concern', class: 'moderate-concern', color: '#e67e22' },
+                    { label: 'Above normal - severe concern', class: 'severe-concern', color: '#e74c3c' }
                 ];
             }
             else {
                 return [
-                    { label: 'Low - severe concern', class: 'severe-concern', color: '#e74c3c' },
-                    { label: 'Low - moderate concern', class: 'moderate-concern', color: '#e67e22' },
-                    { label: 'Low - mild concern', class: 'mild-concern', color: '#f1c40f' },
+                    { label: 'Below normal - severe concern', class: 'severe-concern', color: '#e74c3c' },
+                    { label: 'Below normal - moderate concern', class: 'moderate-concern', color: '#e67e22' },
+                    { label: 'Below normal - mild concern', class: 'mild-concern', color: '#f1c40f' },
                     { label: 'No concern', class: 'no-concern', color: '#2ecc71' },
-                    { label: 'High - mild concern', class: 'mild-concern', color: '#f1c40f' },
-                    { label: 'High - moderate concern', class: 'moderate-concern', color: '#e67e22' },
-                    { label: 'High - severe concern', class: 'severe-concern', color: '#e74c3c' }
+                    { label: 'Above normal - mild concern', class: 'mild-concern', color: '#f1c40f' },
+                    { label: 'Above normal - moderate concern', class: 'moderate-concern', color: '#e67e22' },
+                    { label: 'Above normal - severe concern', class: 'severe-concern', color: '#e74c3c' }
                 ];
             }
         }
@@ -611,11 +611,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const headerRow = document.createElement('tr');
     
         const levelHeader = document.createElement('th');
-        levelHeader.textContent = 'Level';
+        levelHeader.textContent = 'Category';
         const lowerHeader = document.createElement('th');
-        lowerHeader.textContent = 'Lower Bound';
+        lowerHeader.textContent = 'Lower Limit';
         const upperHeader = document.createElement('th');
-        upperHeader.textContent = 'Upper Bound';
+        upperHeader.textContent = 'Upper Limit';
     
         headerRow.appendChild(levelHeader);
         headerRow.appendChild(lowerHeader);
