@@ -563,18 +563,44 @@ input[type="range"]::-moz-range-thumb:hover {
     padding: 0;
 }
 
+.concern-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    outline: none;
+    margin: 20px 0;
+    padding: 0;
+}
 .concern-slider::-webkit-slider-runnable-track {
     width: 100%;
     height: 8px;
     border-radius: 4px;
-    background: linear-gradient(to right, #2ecc71, #e74c3c);
+    background: linear-gradient(to right, 
+        #2ecc71 0%,     /* Start green */
+        #2ecc71 25%,    /* Hold green */
+        #f1c40f 40%,    /* Blend to yellow */
+        #f1c40f 55%,    /* Hold yellow */
+        #e67e22 70%,    /* Blend to orange */
+        #e67e22 85%,    /* Hold orange */
+        #e74c3c 100%    /* Blend to red */
+    );
 }
 
 .concern-slider::-moz-range-track {
     width: 100%;
     height: 8px;
     border-radius: 4px;
-    background: linear-gradient(to right, #2ecc71, #e74c3c);
+    background: linear-gradient(to right, 
+        #2ecc71 0%,     /* Start green */
+        #2ecc71 25%,    /* Hold green */
+        #f1c40f 40%,    /* Blend to yellow */
+        #f1c40f 55%,    /* Hold yellow */
+        #e67e22 70%,    /* Blend to orange */
+        #e67e22 85%,    /* Hold orange */
+        #e74c3c 100%    /* Blend to red */
+    );
 }
 
 .concern-slider::-webkit-slider-thumb {
@@ -582,7 +608,7 @@ input[type="range"]::-moz-range-thumb:hover {
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    background: var(--thumb-color, #fff);
+    background: white;
     border: 2px solid #333;
     cursor: pointer;
     margin-top: -6px;
@@ -593,7 +619,7 @@ input[type="range"]::-moz-range-thumb:hover {
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    background: var(--thumb-color, #fff);
+    background: white;
     border: 2px solid #333;
     cursor: pointer;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);

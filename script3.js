@@ -288,11 +288,11 @@ document.addEventListener('DOMContentLoaded', () => {
         part3Container.appendChild(scenarioDiv);
     });
 
-    // Function to generate gradient color from green to red
-    function getGradientColor(percentage) {
-        const hue = 120 - (percentage * 120);
-        return `hsl(${hue}, 70%, 45%)`;
-    }
+    // Replace the existing getGradientColor function
+function getGradientColor(percentage) {
+    // We don't need to calculate colors anymore since the gradient is in CSS
+    return 'white'; // Return white for the thumb color
+}
 
     // Data collection function
     function collectData() {
