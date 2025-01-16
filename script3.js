@@ -1,4 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize slider interaction tracker
+    const sliderInteractionTracker = Array(14).fill(false);  // 14 scenarios
+
+    function checkAllSlidersInteracted() {
+        return sliderInteractionTracker.every(interacted => interacted);
+    }
+
+    function updateSubmitButton() {
+        const submitButton = document.getElementById('submitButton');
+        if (submitButton) {
+            submitButton.disabled = !checkAllSlidersInteracted();
+        }
+    }
+
+
     const scenarios = [
         {
             id: 1,
@@ -141,19 +156,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     ];
-
     const timePoints = [
         "72 hours previously",
         "24 hours previously",
         "12 hours previously",
         "4 hours previously",
         "Current values"
-    ];
-
-    const questions = [
-        "What is normal for that individual patient.",
-        "Whether the general trend is worsening or improving",
-        "Abnormal values that have occurred within the past 24 hours"
     ];
 
     const part3Container = document.getElementById('part3Container');
@@ -206,110 +214,142 @@ document.addEventListener('DOMContentLoaded', () => {
         table.appendChild(tbody);
         scenarioDiv.appendChild(table);
 
-        // Add importance scale questions for this scenario
-        const questionsDiv = document.createElement('div');
-        questionsDiv.className = 'importance-questions';
+        // Add concern level assessment
+        const concernDiv = document.createElement('div');
+        concernDiv.className = 'concern-assessment';
 
-        const questionsTitle = document.createElement('h4');
-        questionsTitle.textContent = 'For this scenario, how important is it to take account of:';
-        questionsDiv.appendChild(questionsTitle);
+        // Add concern level descriptions
+        const descriptionsDiv = document.createElement('div');
+        descriptionsDiv.className = 'concern-descriptions';
+        descriptionsDiv.innerHTML = `
+            <p>0 = No concern – no requirement for medical assessment.</p>
+            <p>5 = Mild concern – may require medical assessment under some circumstances.</p>
+            <p>10 = Moderate concern – requires medical assessment within 1-4 hours.</p>
+            <p>15 = Severe concern – requires immediate medical attention.</p>
+        `;
+        concernDiv.appendChild(descriptionsDiv);
 
-        const subheading = document.createElement('h5');
-        subheading.innerHTML = 'Select your level of importance:<br>0 = Not at all important<br>8 = Moderately important<br>15 = Extremely important';
-        questionsDiv.appendChild(subheading);
+        // Create slider container
+        const sliderContainer = document.createElement('div');
+        sliderContainer.className = 'slider-container';
 
-        questions.forEach((questionText, questionIndex) => {
-            const questionDiv = document.createElement('div');
-            questionDiv.className = 'question';
+        // Create slider wrapper
+        const sliderWrapper = document.createElement('div');
+        sliderWrapper.className = 'slider-wrapper';
 
-            const label = document.createElement('label');
-            label.textContent = questionText;
-            label.setAttribute('for', `slider-${scenario.id}-${questionIndex}`);
-            questionDiv.appendChild(label);
+        // Create input slider
+        const slider = document.createElement('input');
+        slider.type = 'range';
+        slider.min = '0';
+        slider.max = '15';
+        slider.value = '0';
+        slider.step = '1';
+        slider.id = `slider-${scenario.id}`;
+        slider.className = 'slider concern-slider';
 
-            const sliderContainer = document.createElement('div');
-            sliderContainer.className = 'slider-container';
+        // Create completion indicator
+        const indicator = document.createElement('span');
+        indicator.className = 'completion-indicator';
+        indicator.textContent = '❌';
+        indicator.style.color = 'red';
 
-            // Create input slider
-            const slider = document.createElement('input');
-            slider.type = 'range';
-            slider.min = '0';
-            slider.max = '15';
-            slider.value = '0';
-            slider.step = '1';
-            slider.id = `slider-${scenario.id}-${questionIndex}`;
-            slider.className = 'slider';
-            sliderContainer.appendChild(slider);
+        sliderWrapper.appendChild(slider);
+        sliderWrapper.appendChild(indicator);
+        sliderContainer.appendChild(sliderWrapper);
 
-            // Create tick marks container
-            const tickContainer = document.createElement('div');
-            tickContainer.className = 'tick-container';
+        // Create tick marks container
+        const tickContainer = document.createElement('div');
+        tickContainer.className = 'tick-container';
 
-            // Add tick marks and labels
-            for (let i = 0; i <= 15; i++) {
-                const tick = document.createElement('div');
-                tick.className = i % 5 === 0 ? 'tick major' : 'tick';
-                const position = i === 0 ? 0 : `${(i / 15) * 100}%`;
-                tick.style.left = position;
-                tickContainer.appendChild(tick);
+        // Add tick marks and labels
+for (let i = 0; i <= 15; i++) {
+    const tick = document.createElement('div');
+    tick.className = i % 5 === 0 ? 'tick major' : 'tick';
+    // Adjust position calculation to match slider values precisely
+    const position = i === 0 ? 0 : (i / 15 * 100);
+    tick.style.left = `${position}%`;
+    tickContainer.appendChild(tick);
 
-                if (i % 5 === 0) {
-                    const label = document.createElement('div');
-                    label.className = 'tick-label major';
-                    label.textContent = i;
-                    const labelPosition = i === 0 ? 0 : `${(i / 15) * 100}%`;
-                    label.style.left = labelPosition;
-                    tickContainer.appendChild(label);
-                }
-            }
+    if (i % 5 === 0) {
+        const label = document.createElement('div');
+        label.className = 'tick-label major';
+        label.textContent = i;
+        label.style.left = `${position}%`;
+        tickContainer.appendChild(label);
+    }
+}
 
-            sliderContainer.appendChild(tickContainer);
 
-            const sliderValueDisplay = document.createElement('div');
-            sliderValueDisplay.className = 'slider-values';
+        sliderContainer.appendChild(tickContainer);
+
+        const sliderValueDisplay = document.createElement('div');
+        sliderValueDisplay.className = 'slider-values';
+        sliderContainer.appendChild(sliderValueDisplay);
+
+        // Update display and save data whenever the slider value changes
+        slider.addEventListener('input', () => {
             sliderValueDisplay.textContent = `Selected value: ${slider.value}`;
-            sliderContainer.appendChild(sliderValueDisplay);
-
-            // Update display and save data whenever the slider value changes
-            slider.addEventListener('input', () => {
-                sliderValueDisplay.textContent = `Selected value: ${slider.value}`;
-                // Update thumb color based on value
-                const percentage = slider.value / 15;
-                const color = getGradientColor(percentage);
-                slider.style.setProperty('--thumb-color', color);
-                saveData();
-            });
-
-            questionDiv.appendChild(sliderContainer);
-            questionsDiv.appendChild(questionDiv);
+            // Update thumb color based on value
+            const percentage = slider.value / 15;
+            const color = getGradientColor(percentage);
+            slider.style.setProperty('--thumb-color', color);
+            
+            // Mark this scenario as interacted with
+            sliderInteractionTracker[index] = true;
+            
+            // Update the completion indicator
+            indicator.textContent = '✓';
+            indicator.style.color = 'green';
+            
+            // Update submit button state
+            updateSubmitButton();
+            
+            saveData();
         });
 
-        scenarioDiv.appendChild(questionsDiv);
+        concernDiv.appendChild(sliderContainer);
+        scenarioDiv.appendChild(concernDiv);
         part3Container.appendChild(scenarioDiv);
     });
 
-    // Replace the existing getGradientColor function
-function getGradientColor(percentage) {
-    // We don't need to calculate colors anymore since the gradient is in CSS
-    return 'white'; // Return white for the thumb color
-}
+    // Add CSS for completion indicators and layout
+    const style = document.createElement('style');
+    style.textContent = `
+        .slider-wrapper {
+            display: flex;
+            align-items: flex-start;
+            gap: 30px;
+            margin-bottom: 10px;
+            padding-top: 10px;
+        }
+        .completion-indicator {
+            font-size: 1.2em;
+            font-weight: bold;
+            min-width: 24px;
+            margin-top: -4px;
+        }
+        .concern-slider {
+            flex-grow: 1;
+            margin-bottom: 25px;
+        }
+        .tick-container {
+            margin-top: -25px;
+        }
+    `;
+    document.head.appendChild(style);
+
+    function getGradientColor(percentage) {
+        return 'white'; // Return white for the thumb color
+    }
 
     // Data collection function
     function collectData() {
         const data = scenarios.map(scenario => {
-            const scenarioData = {
+            const slider = document.getElementById(`slider-${scenario.id}`);
+            return {
                 id: scenario.id,
-                responses: {}
+                concernLevel: slider ? parseInt(slider.value) : null
             };
-            
-            questions.forEach((questionText, questionIndex) => {
-                const slider = document.getElementById(`slider-${scenario.id}-${questionIndex}`);
-                if (slider) {
-                    scenarioData.responses[questionText] = parseInt(slider.value);
-                }
-            });
-            
-            return scenarioData;
         });
 
         sessionStorage.setItem('part3Data', JSON.stringify(data));
@@ -323,6 +363,11 @@ function getGradientColor(percentage) {
     window.addEventListener('beforeunload', saveData);
 
     function saveDataToFirestore() {
+        if (!checkAllSlidersInteracted()) {
+            alert('Please interact with all scenarios before submitting.');
+            return;
+        }
+
         const consentData = JSON.parse(sessionStorage.getItem('consentData')) || {};
         const basicInfoData = JSON.parse(sessionStorage.getItem('basicInfoData')) || {};
         const part1Data = JSON.parse(sessionStorage.getItem('part1Data')) || {};
@@ -352,9 +397,16 @@ function getGradientColor(percentage) {
 
     const submitButton = document.getElementById('submitButton');
     if (submitButton) {
+        // Initially disable the submit button
+        submitButton.disabled = true;
+        
         submitButton.addEventListener('click', (event) => {
             event.preventDefault();
-            saveDataToFirestore();
+            if (checkAllSlidersInteracted()) {
+                saveDataToFirestore();
+            } else {
+                alert('Please interact with all scenarios before submitting.');
+            }
         });
     }
 });

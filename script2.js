@@ -1,4 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize slider interaction tracker
+    const sliderInteractionTracker = Array(15).fill(false);
+
+    function checkAllSlidersInteracted() {
+        return sliderInteractionTracker.every(interacted => interacted);
+    }
+
+    function updateSubmitButton() {
+        const submitButton = document.getElementById('submitButton');
+        if (submitButton) {
+            submitButton.disabled = !checkAllSlidersInteracted();
+        }
+    }
     const combinations = [
         // Combination 1
         {
@@ -154,15 +167,24 @@ document.addEventListener('DOMContentLoaded', () => {
         descriptions.className = 'concern-descriptions';
         descriptions.innerHTML = `
             <p>0 = No concern – no requirement for medical assessment.</p>
-<p>5 = Mild concern – may require medical assessment under some circumstances.</p>
-<p>10 = Moderate concern – requires urgent medical assessment within 1-4 hours.</p>
-<p>15 = Severe concern – requires immediate medical attention.</p>
-
+            <p>5 = Mild concern – may require medical assessment under some circumstances.</p>
+            <p>10 = Moderate concern – requires medical assessment within 1-4 hours.</p>
+            <p>15 = Severe concern – requires immediate medical attention.</p>
         `;
         return descriptions;
     }
 
     function createSlider(index) {
+        const sliderContainer = document.createElement('div');
+        sliderContainer.className = 'slider-wrapper';
+
+        // Create completion indicator
+        const indicator = document.createElement('span');
+        indicator.className = 'completion-indicator';
+        indicator.textContent = '❌';
+        indicator.style.color = 'red';
+        sliderContainer.appendChild(indicator);
+
         const slider = document.createElement('input');
         slider.type = 'range';
         slider.min = '0';
@@ -176,14 +198,28 @@ document.addEventListener('DOMContentLoaded', () => {
             const percentage = this.value / 15;
             const color = getGradientColor(percentage);
             this.style.setProperty('--thumb-color', color);
+            
+            // Mark this slider as interacted with
+            sliderInteractionTracker[index] = true;
+            
+            // Update the completion indicator
+            const indicator = this.parentElement.querySelector('.completion-indicator');
+            if (indicator) {
+                indicator.textContent = '✓';
+                indicator.style.color = 'green';
+            }
+            
+            // Update submit button state
+            updateSubmitButton();
+            
             saveData();
         });
 
-        return slider;
+        sliderContainer.appendChild(slider);
+        return sliderContainer;
     }
 
     function getGradientColor(percentage) {
-        // No need to change colors - the gradient is fixed in CSS
         return '#ffffff'; // White thumb color
     }
 
@@ -225,10 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sliderContainer.className = 'slider-container';
 
         sliderContainer.appendChild(createConcernDescriptions());
-        
-        const slider = createSlider(index);
-        sliderContainer.appendChild(slider);
-
+        sliderContainer.appendChild(createSlider(index));
         sliderContainer.appendChild(createTickMarks());
 
         container.appendChild(sliderContainer);
@@ -259,18 +292,51 @@ document.addEventListener('DOMContentLoaded', () => {
         container.appendChild(createCombinationElement(combination, index));
     });
 
-    // Set up next button
-    const nextButton = document.getElementById('submitButton');
-    if (nextButton) {
-        nextButton.addEventListener('click', (event) => {
+    // Set up submit button
+    const submitButton = document.getElementById('submitButton');
+    if (submitButton) {
+        // Initially disable the submit button
+        submitButton.disabled = true;
+
+        submitButton.addEventListener('click', (event) => {
             event.preventDefault();
-            // Save data to session storage
-            collectData();
-            // Proceed to Part 3
-            window.location.href = 'part3.html';
+            if (checkAllSlidersInteracted()) {
+                collectData();
+                window.location.href = 'part3.html';
+            } else {
+                alert('Please interact with all sliders before proceeding.');
+            }
         });
+    } else {
+        console.error('Submit button not found!');
     }
 
     // Save before unload
     window.addEventListener('beforeunload', saveData);
+
+    // Add CSS for completion indicators
+    const style = document.createElement('style');
+    style.textContent = `
+        .slider-wrapper {
+            display: flex;
+            align-items: flex-start;  /* Changed from center to flex-start */
+            gap: 30px;
+            margin-bottom: 10px;
+            padding-top: 10px;  /* Add padding to push content down */
+        }
+        .completion-indicator {
+            font-size: 1.2em;
+            font-weight: bold;
+            min-width: 24px;
+            margin-top: -4px;  /* Adjust vertical position of the indicator */
+        }
+        .concern-slider {
+            flex-grow: 1;
+            margin-bottom: 25px;  /* Add space below slider for tick marks */
+        }
+        .tick-marks {
+            margin-top: -10px;  /* Pull tick marks up under the slider */
+        }
+    `;
+    document.head.appendChild(style);
 });

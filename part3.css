@@ -170,14 +170,16 @@ input[type="range"]::-webkit-slider-runnable-track,
     height: 8px;
     border-radius: 4px;
     background: linear-gradient(to right, 
-        #2ecc71 0%,     /* Green start */
-        #2ecc71 31%,    /* Green until just before 5 */
-        #f1c40f 33%,    /* Yellow starts at 5 */
-        #f1c40f 64%,    /* Yellow until just before 10 */
-        #e67e22 66%,    /* Orange starts at 10 */
-        #e67e22 97%,    /* Orange until just before 15 */
-        #e74c3c 98%,    /* Red starts at 15 */
-        #e74c3c 100%    /* Red at end */
+        #2ecc71 0%,      /* Pure green at 0 */
+        #2ecc71 8.33%,   /* Stay green until ~1.25 */
+        #a7d62e 16.67%,  /* Transition at 2.5 (midpoint) */
+        #f1c40f 33.33%,  /* Pure yellow at 5 */
+        #f1c40f 41.67%,  /* Stay yellow until ~6.25 */
+        #f39c12 50%,     /* Transition at 7.5 (midpoint) */
+        #e67e22 66.67%,  /* Pure orange at 10 */
+        #e67e22 75%,     /* Stay orange until ~11.25 */
+        #e74c3c 83.33%,  /* Transition at 12.5 (midpoint) */
+        #e74c3c 100%     /* Pure red at 15 */
     );
 }
 
@@ -188,14 +190,16 @@ input[type="range"]::-moz-range-track,
     height: 8px;
     border-radius: 4px;
     background: linear-gradient(to right, 
-        #2ecc71 0%,     /* Green start */
-        #2ecc71 31%,    /* Green until just before 5 */
-        #f1c40f 33%,    /* Yellow starts at 5 */
-        #f1c40f 64%,    /* Yellow until just before 10 */
-        #e67e22 66%,    /* Orange starts at 10 */
-        #e67e22 97%,    /* Orange until just before 15 */
-        #e74c3c 98%,    /* Red starts at 15 */
-        #e74c3c 100%    /* Red at end */
+        #2ecc71 0%,      /* Pure green at 0 */
+        #2ecc71 8.33%,   /* Stay green until ~1.25 */
+        #a7d62e 16.67%,  /* Transition at 2.5 (midpoint) */
+        #f1c40f 33.33%,  /* Pure yellow at 5 */
+        #f1c40f 41.67%,  /* Stay yellow until ~6.25 */
+        #f39c12 50%,     /* Transition at 7.5 (midpoint) */
+        #e67e22 66.67%,  /* Pure orange at 10 */
+        #e67e22 75%,     /* Stay orange until ~11.25 */
+        #e74c3c 83.33%,  /* Transition at 12.5 (midpoint) */
+        #e74c3c 100%     /* Pure red at 15 */
     );
 }
 /* Slider Thumb */
@@ -234,8 +238,10 @@ input[type="range"]::-moz-range-thumb,
     margin-top: 10px;
     padding: 20px 0;  /* Added padding for tick spacing */
 }
-
-/* Individual tick marks */
+.tick-container {
+    position: relative;
+    width: 93.5%;
+}
 .tick {
     position: absolute;
     width: 1px;
@@ -266,6 +272,7 @@ input[type="range"]::-moz-range-thumb,
     font-weight: bold;
     color: #444;
 }
+
 
 /* Value Display */
 .slider-value,
@@ -337,6 +344,23 @@ input[type="range"]::-moz-range-thumb,
     background-color: #2980b9;
 }
 
+
+/* Submit Button */
+#backButton {
+    padding: 18px 36px;
+    font-size: 1.2em;
+    color: #fff;
+    background-color: #3498db;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#backButton:hover {
+    background-color: #2980b9;
+}
+
 /* Responsive Design */
 @media screen and (max-width: 768px) {
     .combination,
@@ -364,3 +388,4 @@ input[type="range"]::-moz-range-thumb,
         font-size: 14px;
     }
 }
+

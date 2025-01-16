@@ -578,13 +578,16 @@ input[type="range"]::-moz-range-thumb:hover {
     height: 8px;
     border-radius: 4px;
     background: linear-gradient(to right, 
-        #2ecc71 0%,     /* Start green */
-        #2ecc71 25%,    /* Hold green */
-        #f1c40f 40%,    /* Blend to yellow */
-        #f1c40f 55%,    /* Hold yellow */
-        #e67e22 70%,    /* Blend to orange */
-        #e67e22 85%,    /* Hold orange */
-        #e74c3c 100%    /* Blend to red */
+        #2ecc71 0%,      /* Pure green at 0 */
+        #2ecc71 8.33%,   /* Stay green until ~1.25 */
+        #a7d62e 16.67%,  /* Transition at 2.5 (midpoint) */
+        #f1c40f 33.33%,  /* Pure yellow at 5 */
+        #f1c40f 41.67%,  /* Stay yellow until ~6.25 */
+        #f39c12 50%,     /* Transition at 7.5 (midpoint) */
+        #e67e22 66.67%,  /* Pure orange at 10 */
+        #e67e22 75%,     /* Stay orange until ~11.25 */
+        #e74c3c 83.33%,  /* Transition at 12.5 (midpoint) */
+        #e74c3c 100%     /* Pure red at 15 */
     );
 }
 
@@ -593,15 +596,19 @@ input[type="range"]::-moz-range-thumb:hover {
     height: 8px;
     border-radius: 4px;
     background: linear-gradient(to right, 
-        #2ecc71 0%,     /* Start green */
-        #2ecc71 25%,    /* Hold green */
-        #f1c40f 40%,    /* Blend to yellow */
-        #f1c40f 55%,    /* Hold yellow */
-        #e67e22 70%,    /* Blend to orange */
-        #e67e22 85%,    /* Hold orange */
-        #e74c3c 100%    /* Blend to red */
+        #2ecc71 0%,      /* Pure green at 0 */
+        #2ecc71 8.33%,   /* Stay green until ~1.25 */
+        #a7d62e 16.67%,  /* Transition at 2.5 (midpoint) */
+        #f1c40f 33.33%,  /* Pure yellow at 5 */
+        #f1c40f 41.67%,  /* Stay yellow until ~6.25 */
+        #f39c12 50%,     /* Transition at 7.5 (midpoint) */
+        #e67e22 66.67%,  /* Pure orange at 10 */
+        #e67e22 75%,     /* Stay orange until ~11.25 */
+        #e74c3c 83.33%,  /* Transition at 12.5 (midpoint) */
+        #e74c3c 100%     /* Pure red at 15 */
     );
 }
+
 
 .concern-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
@@ -630,7 +637,7 @@ input[type="range"]::-moz-range-thumb:hover {
     width: calc(100% - 20px);  /* Account for thumb width */
     height: 30px;
     left: 10px;  /* Half of thumb width */
-    margin-top: 30px;  /* Position below the slider */
+    margin-top: -10px;  /* Position below the slider */
 }
 
 .tick {

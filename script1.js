@@ -66,42 +66,91 @@ document.addEventListener('DOMContentLoaded', () => {
             hasBothDirections: false
         }
     ];
-    
+
+    // Initialize slider interaction tracker
+    const sliderInteractionTracker = new Map();
+    vitalSignsData.forEach(sign => {
+        sliderInteractionTracker.set(sign.name, false);
+    });
+
+    // Function to check if all sliders have been interacted with
+    function checkAllSlidersInteracted() {
+        for (let [_, interacted] of sliderInteractionTracker) {
+            if (!interacted) return false;
+        }
+        return true;
+    }
+
+    // Function to update completion status UI
+    function updateCompletionStatus() {
+        const allCompleted = checkAllSlidersInteracted();
+        const submitButton = document.getElementById('submitButton');
+        if (submitButton) {
+            submitButton.disabled = !allCompleted;
+        }
+        
+        vitalSignsData.forEach(sign => {
+            const container = document.querySelector(`[data-vital-sign="${sign.name}"]`);
+            if (container) {
+                const indicator = container.querySelector('.completion-indicator');
+                if (indicator) {
+                    indicator.textContent = sliderInteractionTracker.get(sign.name) ? '✓' : '❌';
+                    indicator.style.color = sliderInteractionTracker.get(sign.name) ? 'green' : 'red';
+                }
+            }
+        });
+    }
+
     // Function to create vital sign elements
     function createVitalSignElement(vitalSign) {
         const container = document.createElement('div');
         container.className = 'vital-sign';
-    
+        container.setAttribute('data-vital-sign', vitalSign.name);
+
+        const titleContainer = document.createElement('div');
+        titleContainer.style.display = 'flex';
+        titleContainer.style.justifyContent = 'space-between';
+        titleContainer.style.alignItems = 'center';
+
         const title = document.createElement('h3');
         title.textContent = `${vitalSign.name} (${vitalSign.unit})`;
-        container.appendChild(title);
-    
+        
+        const indicator = document.createElement('span');
+        indicator.className = 'completion-indicator';
+        indicator.textContent = '❌';
+        indicator.style.color = 'red';
+        indicator.style.marginLeft = '10px';
+
+        titleContainer.appendChild(title);
+        titleContainer.appendChild(indicator);
+        container.appendChild(titleContainer);
+
         const scaleContainer = document.createElement('div');
         scaleContainer.className = 'scale-container';
         scaleContainer.style.position = 'relative';
         container.appendChild(scaleContainer);
-    
+
         const track = document.createElement('div');
         track.className = 'track';
         track.style.position = 'relative';
         scaleContainer.appendChild(track);
-    
+
         const ranges = [];
         const thumbs = [];
         const ticks = [];
-    
+
         const levels = getConcernLevels(vitalSign);
-    
+
         let thresholds = [];
         let numArrows = getNumArrows(vitalSign);
         const min = vitalSign.min;
         const max = vitalSign.max;
-    
+
         // Initialize section visibility states if not already set
         if (!vitalSign.sectionStates) {
             vitalSign.sectionStates = Array(numArrows + 1).fill(true);
         }
-    
+
         function enforceBoundaries(index) {
             const threshold = thresholds[index];
             
@@ -156,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
-    
+
         function updatePositions() {
             // Update thumbs and labels
             thresholds.forEach((threshold, index) => {
@@ -224,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updateTickMarksColor();
             updateThresholdTable(visibleRanges);
         }
-    
+
         function updateThresholdTable(visibleRanges) {
             tableBody.innerHTML = '';
     
@@ -250,12 +299,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
-    
+
         function formatValue(value, vitalSign) {
             const decimals = getMaxDecimalDigits(vitalSign.step);
             return value.toFixed(decimals);
         }
-    
+
         function getMaxDecimalDigits(step) {
             const stepString = step.toString();
             if (stepString.includes('.')) {
@@ -264,7 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return 0;
             }
         }
-    
+
         function getConcernLevels(vitalSign) {
             if (vitalSign.name === "Supplementary oxygen" || vitalSign.name === "Inspired oxygen concentration") {
                 return [
@@ -294,7 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ];
             }
         }
-    
+
         function getTickColor(value, thresholds, levels) {
             for (let i = thresholds.length - 1; i >= 0; i--) {
                 if (value >= thresholds[i].value) {
@@ -303,7 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             return '#999';
         }
-    
+
         function getArrowLevel(index, vitalSign) {
             if (vitalSign.name === "Oxygen Saturation") {
                 switch (index) {
@@ -333,7 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
-    
+
         function getNumArrows(vitalSign) {
             if (vitalSign.name === "Oxygen Saturation" || 
                 vitalSign.name === "Supplementary oxygen" || 
@@ -343,7 +392,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return 6;
             }
         }
-    
+
         function initializeThresholds() {
             thresholds = [{ value: min, levelIndex: 0 }];
             const initialPositions = getRandomPositions(numArrows, min, max, vitalSign.step);
@@ -512,6 +561,10 @@ document.addEventListener('DOMContentLoaded', () => {
         
                 thumb.addEventListener('mousedown', (event) => {
                     isDragging = true;
+                    // Mark this vital sign as interacted with
+                    sliderInteractionTracker.set(vitalSign.name, true);
+                    // Update the UI to reflect completion status
+                    updateCompletionStatus();
                     event.preventDefault();
                 });
         
@@ -566,58 +619,66 @@ document.addEventListener('DOMContentLoaded', () => {
         loadSavedData();
         
         return container;
-        }
+    }
+    
+    const vitalSignsContainer = document.getElementById('vitalSignsContainer');
+    
+    vitalSignsData.forEach(sign => {
+        const element = createVitalSignElement(sign);
+        vitalSignsContainer.appendChild(element);
+    });
+    
+    const submitButton = document.getElementById('submitButton');
+    
+    if (submitButton) {
+        // Initially disable the submit button
+        submitButton.disabled = true;
         
-        const vitalSignsContainer = document.getElementById('vitalSignsContainer');
-        
-        vitalSignsData.forEach(sign => {
-            const element = createVitalSignElement(sign);
-            vitalSignsContainer.appendChild(element);
-        });
-        
-        const submitButton = document.getElementById('submitButton');
-        
-        if (submitButton) {
-            submitButton.addEventListener('click', () => {
+        submitButton.addEventListener('click', () => {
+            if (checkAllSlidersInteracted()) {
                 collectData();
                 alert('Your responses have been saved. Please proceed to Part 2.');
                 window.location.href = 'part2.html';
-            });
-        } else {
-            console.error('Submit button not found!');
-        }
-        
-        function collectData() {
-            const data = {};
-            data.thresholds = [];
-        
-            vitalSignsData.forEach(vitalSign => {
-                const table = document.querySelector(`.threshold-table`);
-                const rows = table.querySelectorAll('tbody tr');
-                const sections = [];
-        
-                rows.forEach(row => {
-                    const level = row.querySelector('td:nth-child(1)').textContent;
-                    const lowerBound = row.querySelector('td:nth-child(2)').textContent;
-                    const upperBound = row.querySelector('td:nth-child(3)').textContent;
-        
-                    sections.push({
-                        level: level.trim(),
-                        start: lowerBound.trim(),
-                        end: upperBound.trim(),
-                        isActive: true
-                    });
-                });
-        
-                data.thresholds.push({
-                    'Vital Sign': vitalSign.name,
-                    'Unit': vitalSign.unit,
-                    'Sections': sections
-                });
-            });
-        
-            sessionStorage.setItem('part1Data', JSON.stringify(data));
-            console.log('Data collected and saved to sessionStorage:', data);
-            return data;
-        }
+            } else {
+                alert('Please interact with all vital sign sliders before submitting.');
+            }
         });
+    } else {
+        console.error('Submit button not found!');
+    }
+    
+    function collectData() {
+        const data = {};
+        data.thresholds = [];
+    
+        vitalSignsData.forEach(vitalSign => {
+            const values = vitalSign.getValues();
+            data.thresholds.push({
+                'Vital Sign': vitalSign.name,
+                'Unit': vitalSign.unit,
+                'Values': values.join(';')
+            });
+        });
+    
+        sessionStorage.setItem('part1Data', JSON.stringify(data));
+        console.log('Data collected and saved to sessionStorage:', data);
+        return data;
+    }
+
+    // Add CSS styles for completion indicators
+    const style = document.createElement('style');
+    style.textContent = `
+        .completion-indicator {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        .vital-sign {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    `;
+    document.head.appendChild(style);
+});
