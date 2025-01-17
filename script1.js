@@ -583,7 +583,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (link && link.getAttribute('href') === 'part2.html') {
                 e.preventDefault();
                 if (!checkAllComplete()) {
-                    alert('You must move all arrows before proceeding to the next part. Please ensure all vital signs are complete.');
                 } else {
                     window.location.href = 'part2.html';
                 }
