@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize slider interaction tracker
-    const sliderInteractionTracker = Array(15).fill(false);
+    let sliderInteractionTracker = Array(15).fill(false);
 
     function checkAllSlidersInteracted() {
         return sliderInteractionTracker.every(interacted => interacted);
@@ -12,126 +12,159 @@ document.addEventListener('DOMContentLoaded', () => {
             submitButton.disabled = !checkAllSlidersInteracted();
         }
     }
+
+    // Load saved data function
+    function loadSavedData() {
+        const savedData = sessionStorage.getItem('part2Data');
+        const savedInteractions = sessionStorage.getItem('part2Interactions');
+        
+        if (savedData) {
+            const ratings = JSON.parse(savedData);
+            ratings.forEach((rating) => {
+                const slider = document.getElementById(`slider-${rating.Combination - 1}`);
+                if (slider) {
+                    slider.value = rating.Rating;
+                    // Update slider appearance
+                    const percentage = rating.Rating / 15;
+                    const color = getGradientColor(percentage);
+                    slider.style.setProperty('--thumb-color', color);
+                    
+                    // Update completion indicator
+                    const indicator = slider.parentElement.querySelector('.completion-indicator');
+                    if (indicator && rating.Rating !== 0) {
+                        indicator.textContent = '✓';
+                        indicator.style.color = 'green';
+                    }
+                }
+            });
+        }
+
+        if (savedInteractions) {
+            sliderInteractionTracker = JSON.parse(savedInteractions);
+            updateSubmitButton();
+        }
+    }
+
     const combinations = [
         // Combination 1
         {
-            'Heart Rate': { value: 110, abnormal: false },
-            'Systolic Blood Pressure': { value: 130, abnormal: false },
-            'Respiratory Rate': { value: 18, abnormal: false },
-            'Temperature': { value: 36.8, abnormal: false },
-            'Oxygen Saturation': { value: 98, abnormal: false }
+            'Heart Rate (beats/min)': { value: 110, abnormal: false },
+            'Systolic Blood Pressure (mmHg)': { value: '130/70', abnormal: false },
+            'Respiratory Rate (breaths/min)': { value: 18, abnormal: false },
+            'Temperature (℃)': { value: 36.8, abnormal: false },
+            'Oxygen Saturation (%, breathing room air)': { value: 98, abnormal: false }
         },
         // Combination 2
         {
-            'Heart Rate': { value: 75, abnormal: false },
-            'Systolic Blood Pressure': { value: 95, abnormal: false },
-            'Respiratory Rate': { value: 18, abnormal: false },
-            'Temperature': { value: 36.8, abnormal: false },
-            'Oxygen Saturation': { value: 98, abnormal: false }
+            'Heart Rate (beats/min)': { value: 75, abnormal: false },
+            'Systolic Blood Pressure (mmHg)': { value: '95/55', abnormal: false },
+            'Respiratory Rate (breaths/min)': { value: 18, abnormal: false },
+            'Temperature (℃)': { value: 36.8, abnormal: false },
+            'Oxygen Saturation (%, breathing room air)': { value: 98, abnormal: false }
         },
         // Combination 3
         {
-            'Heart Rate': { value: 75, abnormal: false },
-            'Systolic Blood Pressure': { value: 130, abnormal: false },
-            'Respiratory Rate': { value: 24, abnormal: false },
-            'Temperature': { value: 36.8, abnormal: false },
-            'Oxygen Saturation': { value: 98, abnormal: false }
+            'Heart Rate (beats/min)': { value: 75, abnormal: false },
+            'Systolic Blood Pressure (mmHg)': { value: '130/70', abnormal: false },
+            'Respiratory Rate (breaths/min)': { value: 24, abnormal: false },
+            'Temperature (℃)': { value: 36.8, abnormal: false },
+            'Oxygen Saturation (%, breathing room air)': { value: 98, abnormal: false }
         },
         // Combination 4
         {
-            'Heart Rate': { value: 75, abnormal: false },
-            'Systolic Blood Pressure': { value: 130, abnormal: false },
-            'Respiratory Rate': { value: 18, abnormal: false },
-            'Temperature': { value: 38.2, abnormal: false },
-            'Oxygen Saturation': { value: 98, abnormal: false }
+            'Heart Rate (beats/min)': { value: 75, abnormal: false },
+            'Systolic Blood Pressure (mmHg)': { value: '130/70', abnormal: false },
+            'Respiratory Rate (breaths/min)': { value: 18, abnormal: false },
+            'Temperature (℃)': { value: 38.2, abnormal: false },
+            'Oxygen Saturation (%, breathing room air)': { value: 98, abnormal: false }
         },
         // Combination 5
         {
-            'Heart Rate': { value: 75, abnormal: false },
-            'Systolic Blood Pressure': { value: 130, abnormal: false },
-            'Respiratory Rate': { value: 18, abnormal: false },
-            'Temperature': { value: 36.8, abnormal: false },
-            'Oxygen Saturation': { value: 92, abnormal: false }
+            'Heart Rate (beats/min)': { value: 75, abnormal: false },
+            'Systolic Blood Pressure (mmHg)': { value: '130/70', abnormal: false },
+            'Respiratory Rate (breaths/min)': { value: 18, abnormal: false },
+            'Temperature (℃)': { value: 36.8, abnormal: false },
+            'Oxygen Saturation (%, breathing room air)': { value: 92, abnormal: false }
         },
         // Combination 6
         {
-            'Heart Rate': { value: 110, abnormal: false },
-            'Systolic Blood Pressure': { value: 95, abnormal: false },
-            'Respiratory Rate': { value: 18, abnormal: false },
-            'Temperature': { value: 36.8, abnormal: false },
-            'Oxygen Saturation': { value: 98, abnormal: false }
+            'Heart Rate (beats/min)': { value: 110, abnormal: false },
+            'Systolic Blood Pressure (mmHg)': { value: '95/55', abnormal: false },
+            'Respiratory Rate (breaths/min)': { value: 18, abnormal: false },
+            'Temperature (℃)': { value: 36.8, abnormal: false },
+            'Oxygen Saturation (%, breathing room air)': { value: 98, abnormal: false }
         },
         // Combination 7
         {
-            'Heart Rate': { value: 110, abnormal: false },
-            'Systolic Blood Pressure': { value: 130, abnormal: false },
-            'Respiratory Rate': { value: 24, abnormal: false },
-            'Temperature': { value: 36.8, abnormal: false },
-            'Oxygen Saturation': { value: 98, abnormal: false }
+            'Heart Rate (beats/min)': { value: 110, abnormal: false },
+            'Systolic Blood Pressure (mmHg)': { value: '130/70', abnormal: false },
+            'Respiratory Rate (breaths/min)': { value: 24, abnormal: false },
+            'Temperature (℃)': { value: 36.8, abnormal: false },
+            'Oxygen Saturation (%, breathing room air)': { value: 98, abnormal: false }
         },
         // Combination 8
         {
-            'Heart Rate': { value: 110, abnormal: false },
-            'Systolic Blood Pressure': { value: 130, abnormal: false },
-            'Respiratory Rate': { value: 18, abnormal: false },
-            'Temperature': { value: 38.2, abnormal: false },
-            'Oxygen Saturation': { value: 98, abnormal: false }
+            'Heart Rate (beats/min)': { value: 110, abnormal: false },
+            'Systolic Blood Pressure (mmHg)': { value: '130/70', abnormal: false },
+            'Respiratory Rate (breaths/min)': { value: 18, abnormal: false },
+            'Temperature (℃)': { value: 38.2, abnormal: false },
+            'Oxygen Saturation (%, breathing room air)': { value: 98, abnormal: false }
         },
         // Combination 9
         {
-            'Heart Rate': { value: 110, abnormal: false },
-            'Systolic Blood Pressure': { value: 130, abnormal: false },
-            'Respiratory Rate': { value: 18, abnormal: false },
-            'Temperature': { value: 36.8, abnormal: false },
-            'Oxygen Saturation': { value: 92, abnormal: false }
+            'Heart Rate (beats/min)': { value: 110, abnormal: false },
+            'Systolic Blood Pressure (mmHg)': { value: '130/70', abnormal: false },
+            'Respiratory Rate (breaths/min)': { value: 18, abnormal: false },
+            'Temperature (℃)': { value: 36.8, abnormal: false },
+            'Oxygen Saturation (%, breathing room air)': { value: 92, abnormal: false }
         },
         // Combination 10
         {
-            'Heart Rate': { value: 75, abnormal: false },
-            'Systolic Blood Pressure': { value: 95, abnormal: false },
-            'Respiratory Rate': { value: 24, abnormal: false },
-            'Temperature': { value: 36.8, abnormal: false },
-            'Oxygen Saturation': { value: 98, abnormal: false }
+            'Heart Rate (beats/min)': { value: 75, abnormal: false },
+            'Systolic Blood Pressure (mmHg)': { value: '95/55', abnormal: false },
+            'Respiratory Rate (breaths/min)': { value: 24, abnormal: false },
+            'Temperature (℃)': { value: 36.8, abnormal: false },
+            'Oxygen Saturation (%, breathing room air)': { value: 98, abnormal: false }
         },
         // Combination 11
         {
-            'Heart Rate': { value: 75, abnormal: false },
-            'Systolic Blood Pressure': { value: 95, abnormal: false },
-            'Respiratory Rate': { value: 18, abnormal: false },
-            'Temperature': { value: 38.2, abnormal: false },
-            'Oxygen Saturation': { value: 98, abnormal: false }
+            'Heart Rate (beats/min)': { value: 75, abnormal: false },
+            'Systolic Blood Pressure (mmHg)': { value: '95/55', abnormal: false },
+            'Respiratory Rate (breaths/min)': { value: 18, abnormal: false },
+            'Temperature (℃)': { value: 38.2, abnormal: false },
+            'Oxygen Saturation (%, breathing room air)': { value: 98, abnormal: false }
         },
         // Combination 12
         {
-            'Heart Rate': { value: 75, abnormal: false },
-            'Systolic Blood Pressure': { value: 95, abnormal: false },
-            'Respiratory Rate': { value: 18, abnormal: false },
-            'Temperature': { value: 36.8, abnormal: false },
-            'Oxygen Saturation': { value: 92, abnormal: false }
+            'Heart Rate (beats/min)': { value: 75, abnormal: false },
+            'Systolic Blood Pressure (mmHg)': { value: '95/55', abnormal: false },
+            'Respiratory Rate (breaths/min)': { value: 18, abnormal: false },
+            'Temperature (℃)': { value: 36.8, abnormal: false },
+            'Oxygen Saturation (%, breathing room air)': { value: 92, abnormal: false }
         },
         // Combination 13
         {
-            'Heart Rate': { value: 75, abnormal: false },
-            'Systolic Blood Pressure': { value: 130, abnormal: false },
-            'Respiratory Rate': { value: 24, abnormal: false },
-            'Temperature': { value: 38.2, abnormal: false },
-            'Oxygen Saturation': { value: 98, abnormal: false }
+            'Heart Rate (beats/min)': { value: 75, abnormal: false },
+            'Systolic Blood Pressure (mmHg)': { value: '130/70', abnormal: false },
+            'Respiratory Rate (breaths/min)': { value: 24, abnormal: false },
+            'Temperature (℃)': { value: 38.2, abnormal: false },
+            'Oxygen Saturation (%, breathing room air)': { value: 98, abnormal: false }
         },
         // Combination 14
         {
-            'Heart Rate': { value: 75, abnormal: false },
-            'Systolic Blood Pressure': { value: 130, abnormal: false },
-            'Respiratory Rate': { value: 24, abnormal: false },
-            'Temperature': { value: 36.8, abnormal: false },
-            'Oxygen Saturation': { value: 92, abnormal: false }
+            'Heart Rate (beats/min)': { value: 75, abnormal: false },
+            'Systolic Blood Pressure (mmHg)': { value: '130/70', abnormal: false },
+            'Respiratory Rate (breaths/min)': { value: 24, abnormal: false },
+            'Temperature (℃)': { value: 36.8, abnormal: false },
+            'Oxygen Saturation (%, breathing room air)': { value: 92, abnormal: false }
         },
         // Combination 15
         {
-            'Heart Rate': { value: 75, abnormal: false },
-            'Systolic Blood Pressure': { value: 130, abnormal: false },
-            'Respiratory Rate': { value: 18, abnormal: false },
-            'Temperature': { value: 38.2, abnormal: false },
-            'Oxygen Saturation': { value: 92, abnormal: false }
+            'Heart Rate (beats/min)': { value: 75, abnormal: false },
+            'Systolic Blood Pressure (mmHg)': { value: '130/70', abnormal: false },
+            'Respiratory Rate (breaths/min)': { value: 18, abnormal: false },
+            'Temperature (℃)': { value: 38.2, abnormal: false },
+            'Oxygen Saturation (%, breathing room air)': { value: 92, abnormal: false }
         }
     ];
 
@@ -178,10 +211,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const sliderContainer = document.createElement('div');
         sliderContainer.className = 'slider-wrapper';
 
-        // Create completion indicator
         const indicator = document.createElement('span');
         indicator.className = 'completion-indicator';
-        indicator.textContent = '❌';
+        indicator.textContent = '';
         indicator.style.color = 'red';
         sliderContainer.appendChild(indicator);
 
@@ -199,19 +231,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const color = getGradientColor(percentage);
             this.style.setProperty('--thumb-color', color);
             
-            // Mark this slider as interacted with
             sliderInteractionTracker[index] = true;
+            sessionStorage.setItem('part2Interactions', JSON.stringify(sliderInteractionTracker));
             
-            // Update the completion indicator
             const indicator = this.parentElement.querySelector('.completion-indicator');
             if (indicator) {
                 indicator.textContent = '✓';
                 indicator.style.color = 'green';
             }
             
-            // Update submit button state
             updateSubmitButton();
-            
             saveData();
         });
 
@@ -292,20 +321,20 @@ document.addEventListener('DOMContentLoaded', () => {
         container.appendChild(createCombinationElement(combination, index));
     });
 
+    // Load saved data after initializing the page
+    loadSavedData();
+
     // Set up submit button
     const submitButton = document.getElementById('submitButton');
     if (submitButton) {
-        // Initially disable the submit button
-        submitButton.disabled = true;
-
         submitButton.addEventListener('click', (event) => {
             event.preventDefault();
-            if (checkAllSlidersInteracted()) {
-                collectData();
-                window.location.href = 'part3.html';
-            } else {
-                alert('Please interact with all sliders before proceeding.');
+            if (!checkAllSlidersInteracted()) {
+                alert("All questions must be answered before proceeding to the next part.");
+                return;
             }
+            collectData();
+            window.location.href = 'part3.html';
         });
     } else {
         console.error('Submit button not found!');
@@ -319,23 +348,23 @@ document.addEventListener('DOMContentLoaded', () => {
     style.textContent = `
         .slider-wrapper {
             display: flex;
-            align-items: flex-start;  /* Changed from center to flex-start */
+            align-items: flex-start;
             gap: 30px;
             margin-bottom: 10px;
-            padding-top: 10px;  /* Add padding to push content down */
+            padding-top: 10px;
         }
         .completion-indicator {
             font-size: 1.2em;
             font-weight: bold;
             min-width: 24px;
-            margin-top: -4px;  /* Adjust vertical position of the indicator */
+            margin-top: -4px;
         }
         .concern-slider {
             flex-grow: 1;
-            margin-bottom: 25px;  /* Add space below slider for tick marks */
+            margin-bottom: 25px;
         }
         .tick-marks {
-            margin-top: -10px;  /* Pull tick marks up under the slider */
+            margin-top: -10px;
         }
     `;
     document.head.appendChild(style);

@@ -250,37 +250,45 @@ document.addEventListener('DOMContentLoaded', () => {
         // Create completion indicator
         const indicator = document.createElement('span');
         indicator.className = 'completion-indicator';
-        indicator.textContent = '❌';
+        indicator.textContent = '';
         indicator.style.color = 'red';
 
         sliderWrapper.appendChild(slider);
         sliderWrapper.appendChild(indicator);
         sliderContainer.appendChild(sliderWrapper);
 
-        // Create tick marks container
-        const tickContainer = document.createElement('div');
-        tickContainer.className = 'tick-container';
+        function createTickMarks() {
+            const tickMarksContainer = document.createElement('div');
+            tickMarksContainer.className = 'tick-marks';
+        
+            // Container for both ticks and labels
+            const ticksContainer = document.createElement('div');
+            ticksContainer.className = 'ticks-container';
+        
+            // Create ticks and labels together
+            for (let i = 0; i <= 15; i++) {
+                const tick = document.createElement('div');
+                tick.className = i % 5 === 0 ? 'tick major' : 'tick';
+                const position = (i / 15) * 100;
+                tick.style.left = `${position}%`;
+                ticksContainer.appendChild(tick);
+        
+                // Add label only for major ticks (multiples of 5)
+                if (i % 5 === 0) {
+                    const label = document.createElement('div');
+                    label.className = 'tick-label';
+                    label.textContent = i;
+                    label.style.left = `${position}%`;
+                    ticksContainer.appendChild(label);
+                }
+            }
+        
+            tickMarksContainer.appendChild(ticksContainer);
+            return tickMarksContainer;
+        }
+        
 
-        // Add tick marks and labels
-for (let i = 0; i <= 15; i++) {
-    const tick = document.createElement('div');
-    tick.className = i % 5 === 0 ? 'tick major' : 'tick';
-    // Adjust position calculation to match slider values precisely
-    const position = i === 0 ? 0 : (i / 15 * 100);
-    tick.style.left = `${position}%`;
-    tickContainer.appendChild(tick);
-
-    if (i % 5 === 0) {
-        const label = document.createElement('div');
-        label.className = 'tick-label major';
-        label.textContent = i;
-        label.style.left = `${position}%`;
-        tickContainer.appendChild(label);
-    }
-}
-
-
-        sliderContainer.appendChild(tickContainer);
+        sliderContainer.appendChild(createTickMarks());
 
         const sliderValueDisplay = document.createElement('div');
         sliderValueDisplay.className = 'slider-values';
@@ -288,7 +296,6 @@ for (let i = 0; i <= 15; i++) {
 
         // Update display and save data whenever the slider value changes
         slider.addEventListener('input', () => {
-            sliderValueDisplay.textContent = `Selected value: ${slider.value}`;
             // Update thumb color based on value
             const percentage = slider.value / 15;
             const color = getGradientColor(percentage);
@@ -312,31 +319,72 @@ for (let i = 0; i <= 15; i++) {
         part3Container.appendChild(scenarioDiv);
     });
 
-    // Add CSS for completion indicators and layout
     const style = document.createElement('style');
-    style.textContent = `
-        .slider-wrapper {
-            display: flex;
-            align-items: flex-start;
-            gap: 30px;
-            margin-bottom: 10px;
-            padding-top: 10px;
-        }
-        .completion-indicator {
-            font-size: 1.2em;
-            font-weight: bold;
-            min-width: 24px;
-            margin-top: -4px;
-        }
-        .concern-slider {
-            flex-grow: 1;
-            margin-bottom: 25px;
-        }
-        .tick-container {
-            margin-top: -25px;
-        }
-    `;
-    document.head.appendChild(style);
+style.textContent = `
+    .slider-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+        margin-bottom: 0px;
+        padding-top: 10px;
+        position: relative;
+    }
+
+    .completion-indicator {
+        position: absolute;
+        font-size: 1.2em;
+        font-weight: bold;
+        left: -30px;  /* Adjust based on your gap size */
+        top: 35px;    /* Move below the slider */
+        min-width: 24px;
+    }
+
+    .concern-slider {
+        width: 100%;
+        margin-bottom: 25px;
+    }
+    .tick-marks {
+        position: relative;
+        width: 97%;
+        height: 40px;
+        margin-top: -10px;
+    }
+
+    .ticks-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+    }
+
+    .tick {
+        position: absolute;
+        width: 1px;
+        height: 5px;
+        background-color: #888;
+        transform: translateX(-50%);
+    }
+
+    .tick.major {
+        height: 10px;
+        width: 2px;
+        background-color: #444;
+    }
+
+    .tick-label {
+        position: absolute;
+        font-size: 12px;
+        color: #666;
+        transform: translateX(-50%);
+        top: 15px;
+        text-align: center;
+    }
+
+    .concern-slider {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+`;
+document.head.appendChild(style);
 
     function getGradientColor(percentage) {
         return 'white'; // Return white for the thumb color
@@ -363,11 +411,6 @@ for (let i = 0; i <= 15; i++) {
     window.addEventListener('beforeunload', saveData);
 
     function saveDataToFirestore() {
-        if (!checkAllSlidersInteracted()) {
-            alert('Please interact with all scenarios before submitting.');
-            return;
-        }
-
         const consentData = JSON.parse(sessionStorage.getItem('consentData')) || {};
         const basicInfoData = JSON.parse(sessionStorage.getItem('basicInfoData')) || {};
         const part1Data = JSON.parse(sessionStorage.getItem('part1Data')) || {};
@@ -397,16 +440,15 @@ for (let i = 0; i <= 15; i++) {
 
     const submitButton = document.getElementById('submitButton');
     if (submitButton) {
-        // Initially disable the submit button
-        submitButton.disabled = true;
-        
         submitButton.addEventListener('click', (event) => {
             event.preventDefault();
-            if (checkAllSlidersInteracted()) {
-                saveDataToFirestore();
-            } else {
-                alert('Please interact with all scenarios before submitting.');
+            
+            if (!checkAllSlidersInteracted()) {
+                alert("All questions must be answered before submitting the form.");
+                return;
             }
+            
+            saveDataToFirestore();
         });
-    }
+    } 
 });
