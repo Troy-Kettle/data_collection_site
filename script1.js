@@ -598,7 +598,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = collectData();
                 if (data) {
                     sessionStorage.setItem('completionStatus', 'true');
-                    alert('Your responses have been saved. Please proceed to Part 2.');
                     window.location.href = 'part2.html';
                 }
             });
