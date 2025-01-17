@@ -594,7 +594,6 @@ document.addEventListener('DOMContentLoaded', () => {
             submitButton.addEventListener('click', (e) => {
                 e.preventDefault();
                 if (!checkAllComplete()) {
-                    alert('You must move all arrows before proceeding. Please complete all vital signs.');
                     return;
                 }
                 const data = collectData();
