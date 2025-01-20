@@ -1,20 +1,51 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize slider interaction tracker
-    const sliderInteractionTracker = Array(14).fill(false);  // 14 scenarios
+     // Initialize slider interaction tracker
+     const sliderInteractionTracker = Array(14).fill(false);  // 14 scenarios
 
-    function checkAllSlidersInteracted() {
-        return sliderInteractionTracker.every(interacted => interacted);
-    }
+     function checkAllSlidersInteracted() {
+         return sliderInteractionTracker.every(interacted => interacted);
+     }
+ 
+     function updateSubmitButton() {
+         const submitButton = document.getElementById('submitButton');
+         if (submitButton) {
+             submitButton.disabled = !checkAllSlidersInteracted();
+         }
+     }
+ 
+     // Load saved data and update sliders
+     function loadSavedData() {
+         const savedData = sessionStorage.getItem('part3Data');
+         if (savedData) {
+             const data = JSON.parse(savedData);
+             data.forEach((item, index) => {
+                 const slider = document.getElementById(`slider-${item.id}`);
+                 if (slider && item.concernLevel !== null) {
+                     slider.value = item.concernLevel;
+                     
+                     // Update the completion indicator
+                     const indicator = slider.parentElement.querySelector('.completion-indicator');
+                     if (indicator) {
+                         indicator.textContent = '✓';
+                         indicator.style.color = 'green';
+                     }
+                     
+                     // Mark as interacted
+                     sliderInteractionTracker[index] = true;
+                     
+                     // Update slider thumb color
+                     const percentage = slider.value / 15;
+                     const color = getGradientColor(percentage);
+                     slider.style.setProperty('--thumb-color', color);
+                 }
+             });
+             // Update submit button state after loading data
+             updateSubmitButton();
+         }
+     }
+ 
 
-    function updateSubmitButton() {
-        const submitButton = document.getElementById('submitButton');
-        if (submitButton) {
-            submitButton.disabled = !checkAllSlidersInteracted();
-        }
-    }
-
-
-    const scenarios = [
+     const scenarios = [
         {
             id: 1,
             data: {
@@ -49,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
             id: 4,
             data: {
                 "Heart rate (beats/min)": [73, 68, 72, 74, 75],
-                "Blood pressure (mmHg)": ["97/63", "103/66", "99/57", "102/60", "95/55"],
+                "Blood pressure (mmHg)": ["97/63", "93/66", "99/57", "96/60", "95/55"],
                 "Respiratory rate (breaths/min)": [18, 18, 19, 19, 18],
                 "Temperature (℃)": [36.8, 36.6, 36.6, 36.5, 36.8],
                 "Oxygen saturation (%, breathing room air)": [98, 96, 97, 98, 98]
@@ -59,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
             id: 5,
             data: {
                 "Heart rate (beats/min)": [73, 68, 72, 74, 75],
-                "Blood pressure (mmHg)": ["132/75", "140/78", "128/71", "108/60", "95/55"],
+                "Blood pressure (mmHg)": ["132/75", "140/78", "128/71", "103/60", "95/55"],
                 "Respiratory rate (breaths/min)": [18, 18, 19, 19, 18],
                 "Temperature (℃)": [36.8, 36.6, 36.6, 36.5, 36.8],
                 "Oxygen saturation (%, breathing room air)": [98, 96, 97, 98, 98]
@@ -80,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
             data: {
                 "Heart rate (beats/min)": [73, 68, 72, 74, 75],
                 "Blood pressure (mmHg)": ["132/75", "140/78", "131/66", "135/73", "130/70"],
-                "Respiratory rate (breaths/min)": [24, 23, 22, 25, 24],
+                "Respiratory rate (breaths/min)": [24, 23, 23, 25, 24],
                 "Temperature (℃)": [36.8, 36.6, 36.6, 36.5, 36.8],
                 "Oxygen saturation (%, breathing room air)": [98, 96, 97, 98, 98]
             }
@@ -90,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
             data: {
                 "Heart rate (beats/min)": [73, 68, 72, 74, 75],
                 "Blood pressure (mmHg)": ["132/75", "140/78", "131/66", "135/73", "130/70"],
-                "Respiratory rate (breaths/min)": [18, 18, 19, 20, 24],
+                "Respiratory rate (breaths/min)": [18, 18, 19, 22, 24],
                 "Temperature (℃)": [36.8, 36.6, 36.6, 36.5, 36.8],
                 "Oxygen saturation (%, breathing room air)": [98, 96, 97, 98, 98]
             }
@@ -111,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 "Heart rate (beats/min)": [73, 68, 72, 74, 75],
                 "Blood pressure (mmHg)": ["132/75", "140/78", "131/66", "135/73", "130/70"],
                 "Respiratory rate (breaths/min)": [18, 18, 19, 19, 18],
-                "Temperature (℃)": [36.8, 36.6, 36.6, 36.5, 38.2],
+                "Temperature (℃)": [36.8, 36.6, 36.6, 38.3, 38.2],
                 "Oxygen saturation (%, breathing room air)": [98, 96, 97, 98, 98]
             }
         },
@@ -121,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 "Heart rate (beats/min)": [73, 68, 72, 74, 75],
                 "Blood pressure (mmHg)": ["132/75", "140/78", "131/66", "135/73", "130/70"],
                 "Respiratory rate (breaths/min)": [18, 18, 19, 19, 18],
-                "Temperature (℃)": [36.8, 36.6, 36.6, 38.2, 36.8],
+                "Temperature (℃)": [36.8, 36.6, 38.3, 38.2, 36.8],
                 "Oxygen saturation (%, breathing room air)": [98, 96, 97, 98, 98]
             }
         },
@@ -294,7 +325,6 @@ document.addEventListener('DOMContentLoaded', () => {
         sliderValueDisplay.className = 'slider-values';
         sliderContainer.appendChild(sliderValueDisplay);
 
-        // Update display and save data whenever the slider value changes
         slider.addEventListener('input', () => {
             // Update thumb color based on value
             const percentage = slider.value / 15;
@@ -313,6 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             saveData();
         });
+
 
         concernDiv.appendChild(sliderContainer);
         scenarioDiv.appendChild(concernDiv);
@@ -345,7 +376,6 @@ style.textContent = `
     }
     .tick-marks {
         position: relative;
-        width: 97%;
         height: 40px;
         margin-top: -10px;
     }
@@ -451,4 +481,5 @@ document.head.appendChild(style);
             saveDataToFirestore();
         });
     } 
+    loadSavedData();
 });

@@ -325,20 +325,27 @@ document.addEventListener('DOMContentLoaded', () => {
     loadSavedData();
 
     // Set up submit button
-    const submitButton = document.getElementById('submitButton');
-    if (submitButton) {
-        submitButton.addEventListener('click', (event) => {
-            event.preventDefault();
-            if (!checkAllSlidersInteracted()) {
-                alert("All questions must be answered before proceeding to the next part.");
-                return;
-            }
-            collectData();
-            window.location.href = 'part3.html';
-        });
-    } else {
-        console.error('Submit button not found!');
-    }
+const submitButton = document.getElementById('submitButton');
+if (submitButton) {
+    submitButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        
+        // Check if all sliders have been interacted with
+        if (!checkAllSlidersInteracted()) {
+            alert("All questions must be answered before proceeding to the next part.");
+            return;
+        }
+        
+        // Collect and save the data
+        const data = collectData();
+        sessionStorage.setItem('part2Data', JSON.stringify(data));
+        
+        // Navigate to the next page
+        window.location.href = 'part3.html';
+    });
+} else {
+    console.error('Submit button not found!');
+}
 
     // Save before unload
     window.addEventListener('beforeunload', saveData);

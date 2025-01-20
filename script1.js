@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     ];
 
-    // Storage functions for persistence of moved arrows
+    // Enhanced storage functions for persistence
     function saveMovedArrows(vitalSignName, movedArrows) {
         const savedData = JSON.parse(sessionStorage.getItem('vitalSignsMovedArrows') || '{}');
         savedData[vitalSignName] = Array.from(movedArrows);
@@ -77,6 +77,18 @@ document.addEventListener('DOMContentLoaded', () => {
     function loadMovedArrows(vitalSignName) {
         const savedData = JSON.parse(sessionStorage.getItem('vitalSignsMovedArrows') || '{}');
         return savedData[vitalSignName] || [];
+    }
+
+    // New functions to save and load threshold positions
+    function saveThresholdPositions(vitalSignName, thresholdValues) {
+        const savedPositions = JSON.parse(sessionStorage.getItem('vitalSignsThresholds') || '{}');
+        savedPositions[vitalSignName] = thresholdValues;
+        sessionStorage.setItem('vitalSignsThresholds', JSON.stringify(savedPositions));
+    }
+
+    function loadThresholdPositions(vitalSignName) {
+        const savedPositions = JSON.parse(sessionStorage.getItem('vitalSignsThresholds') || '{}');
+        return savedPositions[vitalSignName];
     }
 
     // Initialize arrow movement tracking system
@@ -124,9 +136,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     const numMoved = tracker.arrowsMoved.size;
                     const isComplete = numMoved === totalArrows;
                     
+                    // Only show checkmark when complete, otherwise show nothing
                     indicator.textContent = isComplete ? '✓' : '';
-                    indicator.style.color = isComplete ? 'green' : 'red';
-                    indicator.textContent += ` (${numMoved}/${totalArrows} arrows moved)`;
+                    indicator.style.color = isComplete ? 'green' : '';
                 }
             }
         });
@@ -239,6 +251,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function getRandomPositions(numArrows, min, max, step) {
+            // First check if we have saved positions
+            const savedPositions = loadThresholdPositions(vitalSign.name);
+            if (savedPositions && savedPositions.length === numArrows) {
+                return savedPositions;
+            }
+    
+            // If no saved positions, generate random ones
             const positions = [];
             const segmentSize = (max - min) / (numArrows + 1);
         
@@ -255,13 +274,18 @@ document.addEventListener('DOMContentLoaded', () => {
         
             return positions.sort((a, b) => a - b);
         }
-
+    
         function initializeThresholds() {
             const levels = getConcernLevels(vitalSign);
             thresholds = [{ value: min, levelIndex: 0 }];
             const numArrows = getNumArrows(vitalSign);
-            const initialPositions = getRandomPositions(numArrows, min, max, vitalSign.step);
-            initialPositions.forEach((val, idx) => {
+            
+            // Try to load saved positions first
+            const savedPositions = loadThresholdPositions(vitalSign.name);
+            const positions = savedPositions && savedPositions.length === numArrows ? 
+                savedPositions : getRandomPositions(numArrows, min, max, vitalSign.step);
+            
+            positions.forEach((val, idx) => {
                 thresholds.push({ value: val, levelIndex: idx + 1 });
             });
             thresholds.push({ value: max, levelIndex: levels.length - 1 });
@@ -469,21 +493,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
 
-                document.addEventListener('mouseup', () => {
-                    if (isDragging) {
-                        const currentPosition = threshold.value;
-                        const initialPosition = tracker.initialPositions[i-1];
-                        
-                        // Check if arrow has moved from initial position
-                        if (currentPosition !== initialPosition) {
-                            tracker.arrowsMoved.add(i-1);
-                            updateCompletionStatus();
-                            // Save which arrows were moved
-                            saveMovedArrows(vitalSign.name, tracker.arrowsMoved);
-                        }
-                    }
-                    isDragging = false;
-                });
+                // Modify the mouseup event listener in createThumbs function
+    document.addEventListener('mouseup', () => {
+        if (isDragging) {
+            const currentPosition = threshold.value;
+            const initialPosition = tracker.initialPositions[i-1];
+            
+            // Check if arrow has moved from initial position
+            if (currentPosition !== initialPosition) {
+                tracker.arrowsMoved.add(i-1);
+                updateCompletionStatus();
+                
+                // Save both the moved arrows and the current positions
+                saveMovedArrows(vitalSign.name, tracker.arrowsMoved);
+                const currentThresholds = thresholds.slice(1, -1).map(t => t.value);
+                saveThresholdPositions(vitalSign.name, currentThresholds);
+            }
+        }
+        isDragging = false;
+    });
             }
 
             updatePositions();
@@ -593,6 +621,7 @@ document.addEventListener('DOMContentLoaded', () => {
             submitButton.addEventListener('click', (e) => {
                 e.preventDefault();
                 if (!checkAllComplete()) {
+                    alert('Not all arrows have been moved. Please move all arrows before proceeding.');
                     return;
                 }
                 const data = collectData();
