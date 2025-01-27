@@ -322,7 +322,6 @@ input[type="range"]::-moz-range-thumb,
 
 .vital-sign-label {
     text-align: left !important;
-    font-weight: bold;
     background-color: #f9f9f9;
 }
 

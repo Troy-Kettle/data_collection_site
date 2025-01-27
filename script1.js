@@ -102,6 +102,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    function restoreCompletionStatus() {
+        vitalSignsData.forEach(sign => {
+            const savedArrows = loadMovedArrows(sign.name);
+            if (savedArrows.length === getNumArrows(sign)) {
+                const tracker = arrowMovementTracker.get(sign.name);
+                tracker.arrowsMoved = new Set(savedArrows);
+            }
+        });
+        updateCompletionStatus();
+    }
+
     function getNumArrows(vitalSign) {
         if (vitalSign.name === "Oxygen Saturation" || 
             vitalSign.name === "Supplementary oxygen" || 
@@ -144,9 +155,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         const submitButton = document.getElementById('submitButton');
-        if (submitButton) {
-            submitButton.disabled = !checkAllComplete();
+if (submitButton) {
+    submitButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (!checkAllComplete()) {
+            return;
         }
+        const data = collectData();
+        if (data) {
+            sessionStorage.setItem('completionStatus', 'true');
+            window.location.href = 'part2.html';
+        }
+    });
+} else {
+    console.error('Submit button not found');
+}
     }
 
     function createVitalSignElement(vitalSign) {
@@ -597,6 +620,8 @@ document.addEventListener('DOMContentLoaded', () => {
         vitalSignsContainer.appendChild(element);
     });
 
+    restoreCompletionStatus();
+
         // Handle navigation attempts
         window.addEventListener('beforeunload', (e) => {
             if (!checkAllComplete()) {
@@ -611,6 +636,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (link && link.getAttribute('href') === 'part2.html') {
                 e.preventDefault();
                 if (!checkAllComplete()) {
+                    alert('You must complete Part 1 before proceeding to Part 2.');
                 } else {
                     window.location.href = 'part2.html';
                 }

@@ -4,16 +4,23 @@
     <meta charset="UTF-8">
     <title>Part 1: Vital Signs Concern Level Boundaries</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Link to CSS Stylesheet -->
     <link rel="stylesheet" href="styles.css">
+    <script>
+        // Add immediate check before loading anything else
+        if (window.location.pathname.includes('part2.html')) {
+            const isComplete = sessionStorage.getItem('completionStatus') === 'true';
+            if (!isComplete) {
+                alert('You must complete Part 1 first!');
+                window.location.replace('index.html');
+            }
+        }
+    </script>
 </head>
 <body>
-    <!-- Navigation Bar -->
     <div class="navbar">
         <h1>Vital Signs Survey</h1>
     </div>
 
-    <!-- Progress Bar -->
     <div class="container">
         <div class="progress-bar">
             <h3 style="padding: 1%;">33%</h3>
@@ -35,19 +42,32 @@
         <p>
             <strong>No concern (green)</strong> – no requirement for medical assessment.<br>
             <strong>Mild concern (yellow)</strong> – may require medical assessment under some circumstances.<br>
-            <strong>Moderate concern (orange)</strong> – requires urgent medical assessment within 1-4 hours.<br>
+            <strong>Moderate concern (orange)</strong> – requires medical assessment within 1-4 hours.<br>
             <strong>Severe concern (red)</strong> – requires immediate medical attention.
         </p>
         
         <div id="vitalSignsContainer"></div>
 
-        <!-- Navigation Buttons -->
-        <div class="navigation-buttons">
-            <button id="submitButton">Next</button>
-        </div>
+        <form id="part1Form" onsubmit="return validateForm(event)">
+            <div class="navigation-buttons">
+                <button id="submitButton" type="submit">Next</button>
+            </div>
+        </form>
     </div>
 
-    <!-- Include JavaScript File -->
+    <script>
+        function validateForm(event) {
+            event.preventDefault();
+            if (!window.checkAllComplete()) {
+                alert('You must move all sliders before proceeding.');
+                return false;
+            }
+            window.sessionStorage.setItem('completionStatus', 'true');
+            window.location.href = 'part2.html';
+            return false;
+        }
+    </script>
+
     <script src="script1.js" defer></script>
 </body>
 </html>

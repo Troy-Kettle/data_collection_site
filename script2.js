@@ -1,17 +1,18 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize slider interaction tracker
-    let sliderInteractionTracker = Array(15).fill(false);
-
-    function checkAllSlidersInteracted() {
-        return sliderInteractionTracker.every(interacted => interacted);
-    }
-
-    function updateSubmitButton() {
-        const submitButton = document.getElementById('submitButton');
-        if (submitButton) {
-            submitButton.disabled = !checkAllSlidersInteracted();
+    // Only validate if we're on part2.html
+    if (window.location.pathname.includes('part2.html')) {
+        const completionStatus = sessionStorage.getItem('completionStatus');
+        const part1Data = sessionStorage.getItem('part1Data');
+        
+        if (completionStatus !== 'true' || !part1Data) {
+            alert('You must complete Part 1 first');
+            window.location.href = 'part1.html';
+            return;
         }
     }
+
+    // Change from const to let
+    let sliderInteractionTracker = Array(15).fill(false);
 
     // Load saved data function
     function loadSavedData() {
@@ -44,6 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
             updateSubmitButton();
         }
     }
+
+
 
     const combinations = [
         // Combination 1
@@ -231,15 +234,26 @@ document.addEventListener('DOMContentLoaded', () => {
             const color = getGradientColor(percentage);
             this.style.setProperty('--thumb-color', color);
             
-            sliderInteractionTracker[index] = true;
-            sessionStorage.setItem('part2Interactions', JSON.stringify(sliderInteractionTracker));
-            
-            const indicator = this.parentElement.querySelector('.completion-indicator');
-            if (indicator) {
-                indicator.textContent = '✓';
-                indicator.style.color = 'green';
+            // Only mark as interacted if the value is not 0
+            if (this.value !== "0") {
+                sliderInteractionTracker[index] = true;
+                
+                const indicator = this.parentElement.querySelector('.completion-indicator');
+                if (indicator) {
+                    indicator.textContent = '✓';
+                    indicator.style.color = 'green';
+                }
+            } else {
+                sliderInteractionTracker[index] = false;
+                
+                const indicator = this.parentElement.querySelector('.completion-indicator');
+                if (indicator) {
+                    indicator.textContent = '';
+                    indicator.style.color = 'red';
+                }
             }
             
+            sessionStorage.setItem('part2Interactions', JSON.stringify(sliderInteractionTracker));
             updateSubmitButton();
             saveData();
         });
@@ -315,42 +329,64 @@ document.addEventListener('DOMContentLoaded', () => {
         collectData();
     }
 
+    // New function to check if all sliders have been interacted with
+    function checkAllSlidersInteracted() {
+        return sliderInteractionTracker.every(interaction => interaction === true);
+    }
+
+    // New function to update submit button state
+    function updateSubmitButton() {
+        const submitButton = document.getElementById('submitButton');
+        if (submitButton) {
+            // Update visual state but keep button enabled
+            const allSlidersInteracted = checkAllSlidersInteracted();
+            submitButton.style.opacity = allSlidersInteracted ? '1' : '0.5';
+            submitButton.style.cursor = allSlidersInteracted ? 'pointer' : 'not-allowed';
+        }
+    }
+
     // Initialize page
     const container = document.getElementById('part2Container');
     combinations.forEach((combination, index) => {
         container.appendChild(createCombinationElement(combination, index));
     });
 
+    // Set up submit button with new functionality
+    const submitButton = document.getElementById('submitButton');
+    if (submitButton) {
+        // Initially disable the button
+        submitButton.disabled = false; // Allow clicking even if not all sliders are used
+
+        submitButton.addEventListener('click', (event) => {
+            event.preventDefault();
+            
+            if (!checkAllSlidersInteracted()) {
+                const unratedCount = sliderInteractionTracker.filter(x => !x).length;
+                alert(`Please rate all combinations before proceeding. You still need to rate ${unratedCount} combination${unratedCount > 1 ? 's' : ''}.`);
+                return;
+            }
+            
+            // Collect and save the data
+            const data = collectData();
+            sessionStorage.setItem('part2Data', JSON.stringify(data));
+            
+            // Set completion status
+            sessionStorage.setItem('completionStatus', 'true');
+            
+            // Navigate to the next page
+            window.location.href = 'part3.html';
+        });
+    } else {
+        console.error('Submit button not found!');
+    }
+
     // Load saved data after initializing the page
     loadSavedData();
-
-    // Set up submit button
-const submitButton = document.getElementById('submitButton');
-if (submitButton) {
-    submitButton.addEventListener('click', (event) => {
-        event.preventDefault();
-        
-        // Check if all sliders have been interacted with
-        if (!checkAllSlidersInteracted()) {
-            alert("All questions must be answered before proceeding to the next part.");
-            return;
-        }
-        
-        // Collect and save the data
-        const data = collectData();
-        sessionStorage.setItem('part2Data', JSON.stringify(data));
-        
-        // Navigate to the next page
-        window.location.href = 'part3.html';
-    });
-} else {
-    console.error('Submit button not found!');
-}
 
     // Save before unload
     window.addEventListener('beforeunload', saveData);
 
-    // Add CSS for completion indicators
+    // Add CSS for completion indicators and submit button
     const style = document.createElement('style');
     style.textContent = `
         .slider-wrapper {
@@ -372,6 +408,10 @@ if (submitButton) {
         }
         .tick-marks {
             margin-top: -10px;
+        }
+        #submitButton:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
     `;
     document.head.appendChild(style);

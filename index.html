@@ -5,226 +5,213 @@
     <title>Vital Signs Survey - Consent & Basic Info</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css">
-    
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-firestore-compat.js"></script>
 
-    <script>
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyDUqolrnw7CQ-_bPWx0bbSPBEK4MNgkgmo",
-            authDomain: "datacollection-9f8f6.firebaseapp.com",
-            projectId: "datacollection-9f8f6",
-            storageBucket: "datacollection-9f8f6.appspot.com",
-            messagingSenderId: "171849859334",
-            appId: "1:171849859334:web:c0c40fd8ca74a9e10e9e87",
-            measurementId: "G-F2WDNKDP5R"
-        };
-          
-        // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-    </script>
+<script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
     <div class="navbar">
         <h1>Vital Signs Survey</h1>
     </div>
     <div class="container">
-        <!-- <h1>Welcome to the Vital Signs Survey</h1> -->
         <br><br>
         <div style="text-align: center;">
             <img src="Notts.png" alt="Study Image" style="width: 30%;">
         </div>
+    <h1>Vital signs survey participant information</h1>
 
+    <h2>Title of Study: Detecting clinical deterioration in hospital patients using machine learning</h2>
+    <p><strong>Sponsor:</strong> University of Nottingham</p>
+    <p><strong>Chief Investigator:</strong> Sherif Gonem</p>
 
-        <h1>Vital signs survey participant information</h1>
+    <h3>What is the purpose of the study?</h3>
+    <p>We are developing artificial intelligence (AI)-based risk prediction and decision support tools to detect deteriorating patients in hospital who need an urgent medical review. The purpose of this survey is to capture the clinical judgement that is used by experienced clinicians when interpreting vital signs, so that this can be incorporated into the tools we are developing.</p>
 
-        <h2>Title of Study: Detecting clinical deterioration in hospital patients using machine learning</h2>
-        <p><strong>Sponsor:</strong> University of Nottingham</p>
-        <p><strong>Chief Investigator:</strong> Sherif Gonem</p>
+    <h3>Who can take part?</h3>
+    <p>You are eligible to take part in this survey if you are a registered Doctor (Registrar or Consultant level) or Nurse (Band 6 or above), living and working in England or Wales, who looks after acutely unwell adults in hospital as part of your usual job role.</p>
 
-        <h3>What is the purpose of the study?</h3>
-        <p>We are developing artificial intelligence (AI)-based risk prediction and decision support tools to detect deteriorating patients in hospital who need an urgent medical review. The purpose of this survey is to capture the clinical judgement that is used by experienced clinicians when interpreting vital signs, so that this can be incorporated into the tools we are developing.</p>
+    <h3>What will happen if I take part?</h3>
+    <p>After completing the basic information below, you can start the survey straight away. The survey has three sections, each dealing with different aspects of vital sign interpretation. It should take approximately 30 minutes to complete. Please set aside sufficient time to finish the survey, as it needs to be completed in one sitting. The survey is completely anonymous and no personal information will be collected. Once you have completed the survey, please feel free to send the survey link to others you know who are eligible to take part.</p>
 
-        <h3>Who can take part?</h3>
-        <p>You are eligible to take part in this survey if you are a registered Doctor (Registrar or Consultant level) or Nurse (Band 6 or above), living and working in England or Wales, who looks after acutely unwell adults in hospital as part of your usual job role.</p>
+    <h3>What will happen to the results of the research study?</h3>
+    <p>We plan to collect survey results from at least 400 doctors and nurses throughout England and Wales. The results will be used to develop an early warning score that will align closely with the judgement of expert clinicians. We will test its accuracy against currently used scoring systems such as the National Early Warning Score-2 (NEWS-2). The results of the study will be published in peer-reviewed academic journals and presented at scientific meetings. They will be used to inform public policy and to develop the next generation of early warning scores to help keep patients safe in hospital.</p>
 
-        <h3>What will happen if I take part?</h3>
-        <p>After completing the basic information below, you can start the survey straight away. The survey has three sections, each dealing with different aspects of vital sign interpretation. It should take approximately 30 minutes to complete. Please set aside sufficient time to finish the survey, as it needs to be completed in one sitting. The survey is completely anonymous and no personal information will be collected. Once you have completed the survey, please feel free to send the survey link to others you know who are eligible to take part.</p>
+    <h3>Further information and contact details</h3>
+    <p>If you would like further information about this study then you can contact the Chief Investigator:</p>
+    <p><strong>Dr Sherif Gonem</strong><br>
+    Consultant Respiratory Physician and Honorary Associate Professor<br>
+    Nottingham University Hospitals NHS Trust and University of Nottingham<br>
+    <a href="mailto:sherif.gonem@nottingham.ac.uk">sherif.gonem@nottingham.ac.uk</a></p>
+    <br>
 
-        <h3>What will happen to the results of the research study?</h3>
-        <p>We plan to collect survey results from at least 400 doctors and nurses throughout England and Wales. The results will be used to develop an early warning score that will align closely with the judgement of expert clinicians. We will test its accuracy against currently used scoring systems such as the National Early Warning Score-2 (NEWS-2). The results of the study will be published in peer-reviewed academic journals and presented at scientific meetings. They will be used to inform public policy and to develop the next generation of early warning scores to help keep patients safe in hospital.</p>
+    <form id="consentForm">
+        <fieldset>
+            <legend>Consent Form</legend>
+            <label>
+                <input type="checkbox" name="consent1" required>
+                I confirm that I have read and understand the information given above.
+            </label>
+            <br>
+            <label>
+                <input type="checkbox" name="consent2" required>
+                I understand that my participation is voluntary and that I am free to withdraw at any time, without giving any reason, and without my medical care or legal rights being affected.
+            </label>
+            <br>
+            <label>
+                <input type="checkbox" name="consent3" required>
+                I agree to take part in the above study.
+            </label>
+            <br>
+        </fieldset>
 
-        <h3>Further information and contact details</h3>
-        <p>If you would like further information about this study then you can contact the Chief Investigator:</p>
-        <p><strong>Dr Sherif Gonem</strong><br>
-        Consultant Respiratory Physician and Honorary Associate Professor<br>
-        Nottingham University Hospitals NHS Trust and University of Nottingham<br>
-        <a href="mailto:sherif.gonem@nottingham.ac.uk">sherif.gonem@nottingham.ac.uk</a></p>
-<br>
+        <fieldset>
+            <legend>Basic Information</legend>
+            <label for="experience">
+                Are you a registered Doctor (Registrar or Consultant level) or Nurse (Band 6 or above) who looks after acutely unwell adults in hospital as part of your usual job role?
+            </label>
+            <select id="experience" name="experience" required>
+                <option value="">--Select an option--</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+            </select>
+            <br>
 
-        <!-- Start of the form -->
-        <form id="consentForm">
-            <fieldset>
-                <legend>Consent Form</legend>
+            <label for="location">
+                Do you currently live and work in England or Wales?
+            </label>
+            <select id="location" name="location" required>
+                <option value="">--Select an option--</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+            </select>
+            <br>
 
-                <!-- Consent 1 -->
-                <label>
-                    <input type="checkbox" name="consent1" required>
-                    I confirm that I have read and understand the information given above.
-                </label>
-                <br>
+            <label for="role">
+                Please indicate which best describes your role:
+            </label>
+            <select id="role" name="role" required>
+                <option value="">--Select your role--</option>
+                <option value="doctor">Registrar</option>
+                <option value="nurse">Consultant</option>
+                <option value="acp">Ward nurse</option>
+                <option value="specialist_nurse">Specialist nurse</option>
+                <option value="cc_outreach_nurse">Critical Care Outreach Nurse</option>
+                <option value="ACP">Advanced clinical practitioner</option>
+                <option value="hhn_coordinator">Hospital at Night coordinator</option>
+            </select>
+            <br>
 
-                <!-- Consent 2 -->
-                <label>
-                    <input type="checkbox" name="consent2" required>
-                    I understand that my participation is voluntary and that I am free to withdraw at any time, without giving any reason, and without my medical care or legal rights being affected.
-                </label>
-                <br>
+            <label for="specialty">Please indicate which best describes the specialty in which you currently work:</label>
+            <select id="specialty" name="specialty" required>
+                <option value="">--Select your specialty--</option>
+                <option value="not_applicable">Not applicable</option>
+                <option value="acute_medicine">Acute medicine</option>
+                <option value="anaesthetics">Anaesthetics</option>
+                <option value="cardio_thoracic_surgery">Cardio-thoracic surgery</option>
+                <option value="cardiology">Cardiology</option>
+                <option value="clinical_oncology">Clinical oncology</option>
+                <option value="clinical_pharmacology">Clinical pharmacology and therapeutics</option>
+                <option value="clinical_radiology">Clinical radiology</option>
+                <option value="dermatology">Dermatology</option>
+                <option value="emergency_medicine">Emergency medicine</option>
+                <option value="endocrinology">Endocrinology and diabetes mellitus</option>
+                <option value="gastroenterology">Gastroenterology</option>
+                <option value="general_medicine">General (internal) medicine</option>
+                <option value="general_surgery">General surgery</option>
+                <option value="geriatric_medicine">Geriatric medicine</option>
+                <option value="haematology">Haematology</option>
+                <option value="hepatology">Hepatology</option>
+                <option value="infectious_diseases">Infectious diseases</option>
+                <option value="intensive_care">Intensive care medicine</option>
+                <option value="medical_oncology">Medical oncology</option>
+                <option value="neurology">Neurology</option>
+                <option value="neurosurgery">Neurosurgery</option>
+                <option value="obstetrics_gynaecology">Obstetrics and gynaecology</option>
+                <option value="oral_surgery">Oral and maxillo-facial surgery</option>
+                <option value="otolaryngology">Otolaryngology</option>
+                <option value="palliative_medicine">Palliative medicine</option>
+                <option value="plastic_surgery">Plastic surgery</option>
+                <option value="rehabilitation">Rehabilitation medicine</option>
+                <option value="renal_medicine">Renal medicine</option>
+                <option value="respiratory_medicine">Respiratory medicine</option>
+                <option value="rheumatology">Rheumatology</option>
+                <option value="sport_medicine">Sport and exercise medicine</option>
+                <option value="stroke_medicine">Stroke medicine</option>
+                <option value="trauma_orthopaedics">Trauma and orthopaedic surgery</option>
+                <option value="tropical_medicine">Tropical medicine</option>
+                <option value="urology">Urology</option>
+                <option value="vascular_surgery">Vascular surgery</option>
+                <option value="other">Other</option>
+            </select>
+            <br>
+        </fieldset>
 
-                <!-- Consent 3 -->
-                <label>
-                    <input type="checkbox" name="consent3" required>
-                    I agree to take part in the above study.
-                </label>
-                <br>
-            </fieldset>
+        <div class="navigation-buttons">
+            <button type="submit">Start Survey</button>
+        </div>
+    </form>
+</div>
 
-            <!-- Basic Info Section -->
-            <fieldset>
-                <legend>Basic Information</legend>
+<script>
+    // Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyDUqolrnw7CQ-_bPWx0bbSPBEK4MNgkgmo",
+        authDomain: "datacollection-9f8f6.firebaseapp.com",
+        projectId: "datacollection-9f8f6",
+        storageBucket: "datacollection-9f8f6.appspot.com",
+        messagingSenderId: "171849859334",
+        appId: "1:171849859334:web:c0c40fd8ca74a9e10e9e87",
+        measurementId: "G-F2WDNKDP5R"
+    };
+      
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-                <!-- Screening Question 1 -->
-                <label for="experience">
-                    Are you a registered Doctor (Registrar or Consultant level) or Nurse (Band 6 or above) who looks after acutely unwell adults in hospital as part of your usual job role?
-                </label>
-                <select id="experience" name="experience" required>
-                    <option value="">--Select an option--</option>
-                    <option value="yes">Yes</option>
-                    <option value="no">No</option>
-                </select>
-                <br>
+    document.getElementById('consentForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+    
+        // Get all required fields
+        const consent1 = document.querySelector('input[name="consent1"]').checked;
+        const consent2 = document.querySelector('input[name="consent2"]').checked;
+        const consent3 = document.querySelector('input[name="consent3"]').checked;
+        const experience = document.getElementById('experience').value;
+        const location = document.getElementById('location').value;
+        const role = document.getElementById('role').value;
+        const specialty = document.getElementById('specialty').value;
 
-                <!-- Screening Question 2 -->
-                <label for="location">
-                    Do you currently live and work in England or Wales?
-                </label>
-                <select id="location" name="location" required>
-                    <option value="">--Select an option--</option>
-                    <option value="yes">Yes</option>
-                    <option value="no">No</option>
-                </select>
-                <br>
-
-                <!-- Question 3 -->
-                <label for="role">
-                    Please indicate which best describes your role:
-                </label>
-                <select id="role" name="role" required>
-                    <option value="">--Select your role--</option>
-                    <option value="doctor">Registrar</option>
-                    <option value="nurse">Consultant</option>
-                    <option value="acp">Ward nurse</option>
-                    <option value="specialist_nurse">Specialist nurse</option>
-                    <option value="cc_outreach_nurse">Critical Care Outreach Nurse</option>
-                    <option value="ACP">Advanced clinical practitioner</option>
-                    <option value="hhn_coordinator">Hospital at Night coordinator</option>
-                </select>
-                <br>
-
-                <!-- Question 4 -->
-                <label for="specialty">Please indicate which best describes the specialty in which you currently work:</label>
-                <select id="specialty" name="specialty" required>
-                    <option value="">--Select your specialty--</option>
-                    <option value="not_applicable">Not applicable</option>
-                    <option value="acute_medicine">Acute medicine</option>
-                    <option value="anaesthetics">Anaesthetics</option>
-                    <option value="cardio_thoracic_surgery">Cardio-thoracic surgery</option>
-                    <option value="cardiology">Cardiology</option>
-                    <option value="clinical_oncology">Clinical oncology</option>
-                    <option value="clinical_pharmacology">Clinical pharmacology and therapeutics</option>
-                    <option value="clinical_radiology">Clinical radiology</option>
-                    <option value="dermatology">Dermatology</option>
-                    <option value="emergency_medicine">Emergency medicine</option>
-                    <option value="endocrinology">Endocrinology and diabetes mellitus</option>
-                    <option value="gastroenterology">Gastroenterology</option>
-                    <option value="general_medicine">General (internal) medicine</option>
-                    <option value="general_surgery">General surgery</option>
-                    <option value="geriatric_medicine">Geriatric medicine</option>
-                    <option value="haematology">Haematology</option>
-                    <option value="hepatology">Hepatology</option>
-                    <option value="infectious_diseases">Infectious diseases</option>
-                    <option value="intensive_care">Intensive care medicine</option>
-                    <option value="medical_oncology">Medical oncology</option>
-                    <option value="neurology">Neurology</option>
-                    <option value="neurosurgery">Neurosurgery</option>
-                    <option value="obstetrics_gynaecology">Obstetrics and gynaecology</option>
-                    <option value="oral_surgery">Oral and maxillo-facial surgery</option>
-                    <option value="otolaryngology">Otolaryngology</option>
-                    <option value="palliative_medicine">Palliative medicine</option>
-                    <option value="plastic_surgery">Plastic surgery</option>
-                    <option value="rehabilitation">Rehabilitation medicine</option>
-                    <option value="renal_medicine">Renal medicine</option>
-                    <option value="respiratory_medicine">Respiratory medicine</option>
-                    <option value="rheumatology">Rheumatology</option>
-                    <option value="sport_medicine">Sport and exercise medicine</option>
-                    <option value="stroke_medicine">Stroke medicine</option>
-                    <option value="trauma_orthopaedics">Trauma and orthopaedic surgery</option>
-                    <option value="tropical_medicine">Tropical medicine</option>
-                    <option value="urology">Urology</option>
-                    <option value="vascular_surgery">Vascular surgery</option>
-                    <option value="other">Other</option>
-                </select>
-                <br>
-            </fieldset>
-
-            <!-- Submit button -->
-            <div class="navigation-buttons">
-                <button type="submit">Start Survey</button>
-            </div>
-        </form>
-    </div>
-    <script>
-        document.getElementById('consentForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-        
-            // Get all required fields
-            const consent1 = document.querySelector('input[name="consent1"]').checked;
-            const consent2 = document.querySelector('input[name="consent2"]').checked;
-            const consent3 = document.querySelector('input[name="consent3"]').checked;
-            const experience = document.getElementById('experience').value;
-            const location = document.getElementById('location').value;
-            const role = document.getElementById('role').value;
-            const specialty = document.getElementById('specialty').value;
-        
-            // Check if all fields are filled
-            if (consent1 && consent2 && consent3 && experience && location && role && specialty) {
-                // Save the data
-                const consentData = {
-                    consent1: 'Consented',
-                    consent2: 'Consented',
-                    consent3: 'Consented'
-                };
-        
-                const basicInfoData = {
-                    experience: experience,
-                    location: location,
-                    role: role,
-                    specialty: specialty
-                };
-        
-                // Save to sessionStorage
-                sessionStorage.setItem('consentData', JSON.stringify(consentData));
-                sessionStorage.setItem('basicInfoData', JSON.stringify(basicInfoData));
-        
-                // Redirect to next page
-                window.location.href = '/part1.html';
-            } else {
-                alert('Please complete all required fields before proceeding.');
-            }
-        });
-        </script>
+        // Check eligibility first
+        if (experience === 'no' || location === 'no') {
+            alert('Sorry, you are not eligible to take part in the survey.');
+            return;
+        }
+    
+        // Check if all fields are filled
+        if (consent1 && consent2 && consent3 && experience && location && role && specialty) {
+            // Save the data
+            const consentData = {
+                consent1: 'Consented',
+                consent2: 'Consented',
+                consent3: 'Consented'
+            };
+    
+            const basicInfoData = {
+                experience: experience,
+                location: location,
+                role: role,
+                specialty: specialty
+            };
+    
+            // Save to sessionStorage
+            sessionStorage.setItem('consentData', JSON.stringify(consentData));
+            sessionStorage.setItem('basicInfoData', JSON.stringify(basicInfoData));
+    
+            // Redirect to next page
+            window.location.href = '/part1.html';
+        } else {
+            alert('Please complete all required fields before proceeding.');
+        }
+    });
+</script>
 </body>
 </html>
