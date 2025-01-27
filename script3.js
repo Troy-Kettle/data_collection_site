@@ -454,32 +454,34 @@ document.head.appendChild(style);
    window.addEventListener('beforeunload', saveData);
 
    function saveDataToFirestore() {
-       const consentData = JSON.parse(sessionStorage.getItem('consentData')) || {};
-       const basicInfoData = JSON.parse(sessionStorage.getItem('basicInfoData')) || {};
-       const part1Data = JSON.parse(sessionStorage.getItem('part1Data')) || {};
-       const part2Data = JSON.parse(sessionStorage.getItem('part2Data')) || {};
-       const part3Data = JSON.parse(sessionStorage.getItem('part3Data')) || {};
+    const consentData = JSON.parse(sessionStorage.getItem('consentData')) || {};
+    const basicInfoData = JSON.parse(sessionStorage.getItem('basicInfoData')) || {};
+    const part1Data = JSON.parse(sessionStorage.getItem('part1Data')) || {};
+    const part2Data = JSON.parse(sessionStorage.getItem('part2Data')) || {};
+    const part3Data = JSON.parse(sessionStorage.getItem('part3Data')) || {};
 
-       const allData = {
-           consentData,
-           basicInfoData,
-           part1Data,
-           part2Data,
-           part3Data,
-           timestamp: new Date()
-       };
+    const allData = {
+        consentData,
+        basicInfoData,
+        part1Data,
+        part2Data,
+        part3Data,
+        timestamp: new Date()
+    };
 
-       db.collection('vital_signs_survey').add(allData)
-           .then(docRef => {
-               console.log('Document written with ID: ', docRef.id);
-               alert('Your responses have been saved. Thank you for completing the survey.');
-               window.location.href = 'index.html';
-           })
-           .catch(error => {
-               console.error('Error adding document: ', error);
-               alert('There was an error saving your data. Please try again.');
-           });
-   }
+    db.collection('vital_signs_survey').add(allData)
+        .then(docRef => {
+            console.log('Document written with ID: ', docRef.id);
+            // Clear all session storage data
+            sessionStorage.clear();
+            alert('Your responses have been saved. Thank you for completing the survey.');
+            window.location.href = 'index.html';
+        })
+        .catch(error => {
+            console.error('Error adding document: ', error);
+            alert('There was an error saving your data. Please try again.');
+        });
+}
 
    const submitButton = document.getElementById('submitButton');
    if (submitButton) {
