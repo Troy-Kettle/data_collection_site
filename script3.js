@@ -1,16 +1,101 @@
+// function validateProgression() {
+//     if (!window.location.pathname.includes('part3.html')) {
+//         return true;
+//     }
+//     try {
+//         // Get stored data
+//         const part1Data = sessionStorage.getItem('part1Data');
+//         const part2Data = sessionStorage.getItem('part2Data');
+
+//         // Check if both parts have data
+//         if (!part1Data || !part2Data) {
+//             alert('You must complete Parts 1 and 2 first');
+//             window.location.href = 'index.html';
+//             return false;
+//         }
+
+//         // Parse part 2 data and check completion status
+
+//         let part2CompletionStatus;
+//         try {
+//             const parsedPart2Data = JSON.parse(part2Data);
+//             part2CompletionStatus = parsedPart2Data && typeof parsedPart2Data === 'object' && parsedPart2Data.completed === true;  // Strict comparison to ensure it's true
+//         } catch (e) {
+//             console.error('Error parsing part2Data:', e);
+//             alert('There was an error validating Part 2 completion. Please try completing Part 2 again.');
+//             window.location.href = 'part2.html';
+//             return false;
+//         }
+
+//         // Check completion status
+//         if (!part2CompletionStatus) {
+//             alert('You must fully complete Part 2 before proceeding to Part 3');
+//             window.location.href = 'part2.html';
+//             return false;
+//         }
+
+//         return true;  // All validations passed
+//     } catch (e) {
+//         console.error('Validation error:', e);
+//         alert('An error occurred during validation. Please start from the beginning.');
+//         window.location.href = 'index.html';
+//         return false;
+//     }
+// }
+
+
+
+
+
 document.addEventListener('DOMContentLoaded', () => {
 
-// Validate progression to part3
+    // if (!validateProgression()) {
+    //     return;
+    // }
+
+    // Only validate if we're on part3.html
 if (window.location.pathname.includes('part3.html')) {
+    const completionStatus = sessionStorage.getItem('completionStatus');
     const part1Data = sessionStorage.getItem('part1Data');
-    const part2Data = sessionStorage.getItem('part2Data');
+    // const part2Data = sessionStorage.getItem('part2Data');
     
-    if (!part1Data || !part2Data) {
-        alert('You must complete Parts 1 and 2 first');
-        window.location.href = 'index.html';
+    if (completionStatus !== 'true' || !part1Data) {
+        alert('You must complete Part 1 first');
+        window.location.href = 'part1.html';
         return;
     }
+
+    const part2Interactions = JSON.parse(sessionStorage.getItem('part2Interactions') || '[]');
+    
+    // Check if Part 2 is incomplete or there's no valid data
+    if (completionStatus !== 'true') {
+        alert('You must complete Part 2 first');
+        window.location.href = 'part2.html';
+        return;
+    }
+
+    // If part2Interactions includes any false (incomplete interaction), prevent loading Part 3
+    if (part2Interactions.includes(false)) {
+        alert('You must complete all interactions in Part 2 before proceeding to Part 3');
+        window.location.href = 'part2.html';
+        return;
+    }
+
+    // // Check if all sliders are interacted with
+    // if (!checkAllSlidersInteracted()) {
+    //     alert('You must interact with all sliders before proceeding to Part 3');
+    //     window.location.href = 'part2.html';
+    //     return;
+    // }
 }
+
+// Function to check if all sliders have been interacted with
+// function checkAllSlidersInteracted() {
+//     const sliders = document.querySelectorAll('.slider'); // assuming sliders have class 'slider'
+//     return Array.from(sliders).every(slider => slider.value !== '' && slider.value !== null);
+// }
+
+
 
     // Initialize slider interaction tracker
     const sliderInteractionTracker = Array(14).fill(false);  // 14 scenarios
@@ -26,37 +111,43 @@ if (window.location.pathname.includes('part3.html')) {
         }
     }
 
-    // Load saved data and update sliders
     function loadSavedData() {
         const savedData = sessionStorage.getItem('part3Data');
         if (savedData) {
             const data = JSON.parse(savedData);
+    
             data.forEach((item, index) => {
                 const slider = document.getElementById(`slider-${item.id}`);
-                if (slider && item.concernLevel !== null) {
-                    slider.value = item.concernLevel;
-                    
-                    // Update the completion indicator
+                if (slider) {
+                    // Set the slider value from saved data
+                    slider.value = item.concernLevel || 0;
+    
+                    // Check if the slider was interacted with
                     const indicator = slider.parentElement.querySelector('.completion-indicator');
-                    if (indicator) {
+                    if (item.userInteracted) {
+                        // Mark as completed
+                        sliderInteractionTracker[index] = true;
                         indicator.textContent = '✓';
                         indicator.style.color = 'green';
+                    } else {
+                        // Reset the indicator if not interacted
+                        sliderInteractionTracker[index] = false;
+                        indicator.textContent = '';
+                        indicator.style.color = 'red';
                     }
-                    
-                    // Mark as interacted
-                    sliderInteractionTracker[index] = true;
-                    
+    
                     // Update slider thumb color
                     const percentage = slider.value / 15;
                     const color = getGradientColor(percentage);
                     slider.style.setProperty('--thumb-color', color);
                 }
             });
-            // Update submit button state after loading data
+    
+            // Update the submit button state after loading data
             updateSubmitButton();
         }
     }
-
+    
 
     const scenarios = [
        {
@@ -339,23 +430,24 @@ if (window.location.pathname.includes('part3.html')) {
        sliderContainer.appendChild(sliderValueDisplay);
 
        slider.addEventListener('input', () => {
-           // Update thumb color based on value
-           const percentage = slider.value / 15;
-           const color = getGradientColor(percentage);
-           slider.style.setProperty('--thumb-color', color);
-           
-           // Mark this scenario as interacted with
-           sliderInteractionTracker[index] = true;
-           
-           // Update the completion indicator
-           indicator.textContent = '✓';
-           indicator.style.color = 'green';
-           
-           // Update submit button state
-           updateSubmitButton();
-           
-           saveData();
-       });
+        // Mark the slider as interacted with
+        sliderInteractionTracker[index] = true;
+    
+        // Update the completion indicator
+        const indicator = slider.parentElement.querySelector('.completion-indicator');
+        indicator.textContent = '✓';
+        indicator.style.color = 'green';
+    
+        // Update slider thumb color
+        const percentage = slider.value / 15;
+        const color = getGradientColor(percentage);
+        slider.style.setProperty('--thumb-color', color);
+    
+        // Save the updated state
+        saveData();
+        updateSubmitButton();
+    });
+    
 
 
        concernDiv.appendChild(sliderContainer);
@@ -429,27 +521,27 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-   function getGradientColor(percentage) {
+   function getGradientColor() {
        return 'white'; // Return white for the thumb color
    }
 
-   // Data collection function
    function collectData() {
-       const data = scenarios.map(scenario => {
-           const slider = document.getElementById(`slider-${scenario.id}`);
-           return {
-               id: scenario.id,
-               concernLevel: slider ? parseInt(slider.value) : null
-           };
-       });
+    const data = scenarios.map((scenario, index) => {
+        const slider = document.getElementById(`slider-${scenario.id}`);
+        return {
+            id: scenario.id,
+            concernLevel: slider ? parseInt(slider.value) : null,
+            userInteracted: sliderInteractionTracker[index] || false, // Save interaction state
+        };
+    });
 
-       sessionStorage.setItem('part3Data', JSON.stringify(data));
-       return data;
-   }
+    sessionStorage.setItem('part3Data', JSON.stringify(data));
+    return data;
+}
 
-   function saveData() {
-       collectData();
-   }
+function saveData() {
+    collectData();
+}
 
    window.addEventListener('beforeunload', saveData);
 

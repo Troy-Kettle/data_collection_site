@@ -7,14 +7,17 @@
     <link rel="stylesheet" href="styles.css">
     <script>
         // Add immediate check before loading anything else
-        if (window.location.pathname.includes('part2.html')) {
-            const isComplete = sessionStorage.getItem('completionStatus') === 'true';
-            if (!isComplete) {
-                alert('You must complete Part 1 first!');
-                window.location.replace('index.html');
+        const path = window.location.pathname;
+        if (path.includes('part3.html')) {
+            const isPart1Complete = sessionStorage.getItem('completionStatus') === 'true';
+            if (!isPart1Complete) {
+            alert('You must complete Part 1 first!');
+            window.location.replace('part1.html');
             }
         }
     </script>
+    
+    
 </head>
 <body>
     <div class="navbar">
