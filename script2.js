@@ -251,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sliderContainer.appendChild(slider);
         return sliderContainer;
     }
-    
+
     function getGradientColor(percentage) {
         return '#ffffff'; // White thumb color
     }
@@ -301,6 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return container;
     }
+    
 
     function collectData() {
         const ratings = combinations.map((_, index) => {

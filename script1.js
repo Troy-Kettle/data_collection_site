@@ -581,25 +581,42 @@ if (submitButton) {
             tableBody.innerHTML = '';
             const levels = getConcernLevels(vitalSign);
             
+            // Create an array of sections with their boundaries
+            let sections = [];
             for (let i = 1; i < thresholds.length; i++) {
+                const lowerValue = i === 1 ? thresholds[i-1].value : 
+                    thresholds[i-1].value + vitalSign.step;
+                const upperValue = thresholds[i].value;
+                
+                // Only add the section if it has a non-zero range
+                if (upperValue > lowerValue || 
+                    (i === 1 && upperValue === lowerValue)) { // Special case for first section
+                    sections.push({
+                        level: levels[thresholds[i-1].levelIndex].label,
+                        lower: lowerValue,
+                        upper: upperValue
+                    });
+                }
+            }
+            
+            // Render the filtered sections
+            sections.forEach(section => {
                 const row = document.createElement('tr');
                 
                 const levelCell = document.createElement('td');
-                levelCell.textContent = levels[thresholds[i-1].levelIndex].label;
+                levelCell.textContent = section.level;
                 
                 const lowerCell = document.createElement('td');
-                const lowerValue = i === 1 ? thresholds[i-1].value : 
-                    thresholds[i-1].value + vitalSign.step;
-                lowerCell.textContent = formatValue(lowerValue, vitalSign);
+                lowerCell.textContent = formatValue(section.lower, vitalSign);
                 
                 const upperCell = document.createElement('td');
-                upperCell.textContent = formatValue(thresholds[i].value, vitalSign);
+                upperCell.textContent = formatValue(section.upper, vitalSign);
                 
                 row.appendChild(levelCell);
                 row.appendChild(lowerCell);
                 row.appendChild(upperCell);
                 tableBody.appendChild(row);
-            }
+            });
         }
 
         vitalSign.getValues = function() {
