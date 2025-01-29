@@ -234,23 +234,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const color = getGradientColor(percentage);
             this.style.setProperty('--thumb-color', color);
             
-            // Only mark as interacted if the value is not 0
-            if (this.value !== "0") {
-                sliderInteractionTracker[index] = true;
-                
-                const indicator = this.parentElement.querySelector('.completion-indicator');
-                if (indicator) {
-                    indicator.textContent = '✓';
-                    indicator.style.color = 'green';
-                }
-            } else {
-                sliderInteractionTracker[index] = false;
-                
-                const indicator = this.parentElement.querySelector('.completion-indicator');
-                if (indicator) {
-                    indicator.textContent = '';
-                    indicator.style.color = 'red';
-                }
+            // Mark as interacted regardless of value
+            sliderInteractionTracker[index] = true;
+            
+            const indicator = this.parentElement.querySelector('.completion-indicator');
+            if (indicator) {
+                indicator.textContent = '✓';
+                indicator.style.color = 'green';
             }
             
             sessionStorage.setItem('part2Interactions', JSON.stringify(sliderInteractionTracker));
@@ -261,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sliderContainer.appendChild(slider);
         return sliderContainer;
     }
-
+    
     function getGradientColor(percentage) {
         return '#ffffff'; // White thumb color
     }
