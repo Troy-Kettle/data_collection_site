@@ -584,17 +584,16 @@ if (submitButton) {
             // Create an array of sections with their boundaries
             let sections = [];
             for (let i = 1; i < thresholds.length; i++) {
-                const lowerValue = i === 1 ? thresholds[i-1].value : 
-                    thresholds[i-1].value + vitalSign.step;
-                const upperValue = thresholds[i].value;
+                // Calculate the actual values for true length calculation
+                const trueLength = thresholds[i].value - thresholds[i-1].value;
                 
-                // Only add the section if it has a non-zero range
-                if (upperValue > lowerValue || 
-                    (i === 1 && upperValue === lowerValue)) { // Special case for first section
+                // Only exclude sections where the true length is 0
+                if (trueLength > 0) {
                     sections.push({
                         level: levels[thresholds[i-1].levelIndex].label,
-                        lower: lowerValue,
-                        upper: upperValue
+                        // For display, show the threshold value minus 1 for lower limit
+                        lower: i === 1 ? thresholds[i-1].value : thresholds[i].value,
+                        upper: thresholds[i].value
                     });
                 }
             }
@@ -607,7 +606,12 @@ if (submitButton) {
                 levelCell.textContent = section.level;
                 
                 const lowerCell = document.createElement('td');
-                lowerCell.textContent = formatValue(section.lower, vitalSign);
+                // Display the lower value minus 1 except for the first section
+                if (section === sections[0]) {
+                    lowerCell.textContent = formatValue(section.lower, vitalSign);
+                } else {
+                    lowerCell.textContent = formatValue(section.lower - vitalSign.step, vitalSign);
+                }
                 
                 const upperCell = document.createElement('td');
                 upperCell.textContent = formatValue(section.upper, vitalSign);
