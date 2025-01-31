@@ -644,7 +644,7 @@ if (submitButton) {
                 if (sectionWidth > 0 || isNoConcern) {
                     sections.push({
                         level: levels[thresholds[i-1].levelIndex].label,
-                        lower: i === 1 ? thresholds[i-1].value : thresholds[i].value,
+                        lower: thresholds[i-1].value,
                         upper: thresholds[i].value,
                         zeroWidth: sectionWidth === 0,
                         isNoConcern: isNoConcern
@@ -653,18 +653,14 @@ if (submitButton) {
             }
             
             // Render sections
-            sections.forEach(section => {
+            sections.forEach((section, index) => {
                 const row = document.createElement('tr');
                 
                 const levelCell = document.createElement('td');
                 levelCell.textContent = section.level;
                 
                 const lowerCell = document.createElement('td');
-                if (section === sections[0]) {
-                    lowerCell.textContent = formatValue(section.lower, vitalSign);
-                } else {
-                    lowerCell.textContent = formatValue(section.lower - vitalSign.step, vitalSign);
-                }
+                lowerCell.textContent = formatValue(section.lower, vitalSign);
                 
                 const upperCell = document.createElement('td');
                 upperCell.textContent = formatValue(section.upper, vitalSign);
@@ -681,7 +677,6 @@ if (submitButton) {
                 tableBody.appendChild(row);
             });
         }
-    
 
         vitalSign.getValues = function() {
             return thresholds.slice(1, -1)
