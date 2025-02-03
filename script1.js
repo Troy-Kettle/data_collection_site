@@ -645,7 +645,7 @@ if (submitButton) {
                     sections.push({
                         level: levels[thresholds[i-1].levelIndex].label,
                         lower: thresholds[i-1].value,
-                        upper: thresholds[i].value,
+                        upper: thresholds[i].value - 1,
                         zeroWidth: sectionWidth === 0,
                         isNoConcern: isNoConcern
                     });
@@ -658,7 +658,7 @@ if (submitButton) {
                 
                 const levelCell = document.createElement('td');
                 levelCell.textContent = section.level;
-                
+               
                 const lowerCell = document.createElement('td');
                 lowerCell.textContent = formatValue(section.lower, vitalSign);
                 
