@@ -314,74 +314,60 @@ if (submitButton) {
             thresholds.push({ value: max, levelIndex: levels.length - 1 });
         }
 
-        function enforceBoundaries(index) {
-            const threshold = thresholds[index];
-            const levels = getConcernLevels(vitalSign);
+       function enforceBoundaries(index) {
+    const threshold = thresholds[index];
+    const levels = getConcernLevels(vitalSign);
+    
+    threshold.value = Math.max(min, Math.min(threshold.value, max));
+
+    // Calculate the minor tick interval (1/5 of major tick, except for Temperature)
+    const minorTickInterval = vitalSign.name === "Temperature" ? 0.2 : vitalSign.majorTick / 5;
+    const minNoConcernWidth = minorTickInterval * 3; // 3 minor teeth worth of width
+
+    // Special handling for oxygen-related vital signs
+    if (vitalSign.name === "Supplementary oxygen" || vitalSign.name === "Inspired oxygen concentration") {
+        if (index === 1) {
+            const minSpace = vitalSign.step * 0.1;
+            threshold.value = Math.max((min + 1) + minSpace, threshold.value);
+        }
+
+        if (index > 0) {
+            threshold.value = Math.max(thresholds[index - 1].value, threshold.value);
+        }
+        if (index < thresholds.length - 1) {
+            threshold.value = Math.min(thresholds[index + 1].value, threshold.value);
+        }
+        return;
+    }
+
+    // Modified logic for heart rate and respiratory rate
+    if (vitalSign.name === "Heart Rate" || vitalSign.name === "Respiratory Rate") {
+        const middleIndex = Math.floor(thresholds.length / 2);
+
+        // When moving boundaries of "No concern" section
+        if (index === middleIndex || index === middleIndex - 1) {
+            const noConcernStart = thresholds[middleIndex - 1].value;
+            const noConcernEnd = thresholds[middleIndex].value;
             
-            threshold.value = Math.max(min, Math.min(threshold.value, max));
-        
-            // Special handling for oxygen-related vital signs
-            if (vitalSign.name === "Supplementary oxygen" || vitalSign.name === "Inspired oxygen concentration") {
-                // Find the index where "No concern" section starts
-                const noConcernIndex = levels.findIndex(level => level.label === "No concern");
-                
-                // Only enforce minimum width for "No concern" section
-                if (index === 1) { // First movable threshold
-                    // Ensure there's always at least 2px worth of space for "No concern"
-                    const minSpace = vitalSign.step * 0.1; // Very small minimum space
-                    threshold.value = Math.max(min + minSpace, threshold.value);
-                }
-        
-                // Basic sequential ordering
+            // Moving left boundary of "No concern"
+            if (index === middleIndex - 1) {
+                const maxAllowedValue = thresholds[middleIndex].value - minNoConcernWidth;
+                threshold.value = Math.min(threshold.value, maxAllowedValue);
                 if (index > 0) {
                     threshold.value = Math.max(thresholds[index - 1].value, threshold.value);
                 }
+            }
+            // Moving right boundary of "No concern"
+            else if (index === middleIndex) {
+                const minAllowedValue = thresholds[middleIndex - 1].value + minNoConcernWidth;
+                threshold.value = Math.max(threshold.value, minAllowedValue);
                 if (index < thresholds.length - 1) {
                     threshold.value = Math.min(thresholds[index + 1].value, threshold.value);
                 }
-                return;
             }
-    
-            // For all other vital signs
-            const noConcernIndex = levels.findIndex(level => level.label === "No concern");
-            const valueRange = max - min;
-            const minNoConcernWidth = valueRange * 0.02; // 2% of total range
-    
-            // Find the boundaries of the "No concern" section
-            let noConcernStart, noConcernEnd;
-            if (vitalSign.name === "Oxygen Saturation") {
-                // For Oxygen Saturation, "No concern" is at the top
-                noConcernStart = thresholds[thresholds.length - 2].value;
-                noConcernEnd = max;
-            } else {
-                // For other vital signs, "No concern" is in the middle
-                const middleIndex = Math.floor(thresholds.length / 2);
-                noConcernStart = thresholds[middleIndex - 1].value;
-                noConcernEnd = thresholds[middleIndex].value;
-            }
-    
-            // Enforce minimum width for "No concern" section
-            if (index > 0 && index < thresholds.length - 1) {
-                const isNoConcernBoundary = (
-                    (vitalSign.name === "Oxygen Saturation" && index === thresholds.length - 2) ||
-                    (vitalSign.name !== "Oxygen Saturation" && Math.abs(index - (thresholds.length / 2)) <= 1)
-                );
-    
-                if (isNoConcernBoundary) {
-                    // Ensure minimum width for "No concern" section
-                    if (noConcernEnd - noConcernStart < minNoConcernWidth) {
-                        if (index === Math.floor(thresholds.length / 2)) {
-                            // Moving right boundary of "No concern"
-                            threshold.value = Math.max(threshold.value, noConcernStart + minNoConcernWidth);
-                        } else {
-                            // Moving left boundary of "No concern"
-                            threshold.value = Math.min(threshold.value, noConcernEnd - minNoConcernWidth);
-                        }
-                    }
-                }
-            }
-    
-            // Basic sequential ordering
+        }
+        // For other thresholds, just maintain ordering
+        else {
             if (index > 0) {
                 threshold.value = Math.max(thresholds[index - 1].value, threshold.value);
             }
@@ -389,8 +375,49 @@ if (submitButton) {
                 threshold.value = Math.min(thresholds[index + 1].value, threshold.value);
             }
         }
-        
-        function updatePositions() {
+        return;
+    }
+
+    // Default handling for other vital signs
+    if (vitalSign.name === "Oxygen Saturation") {
+        if (index > 0) {
+            threshold.value = Math.max(thresholds[index - 1].value, threshold.value);
+        }
+        if (index < thresholds.length - 1) {
+            threshold.value = Math.min(thresholds[index + 1].value, threshold.value);
+        }
+    } else {
+        const middleIndex = Math.floor(thresholds.length / 2);
+
+        if (index === middleIndex || index === middleIndex - 1) {
+            const noConcernStart = thresholds[middleIndex - 1].value;
+            const noConcernEnd = thresholds[middleIndex].value;
+            
+            if (index === middleIndex - 1) {
+                const maxAllowedValue = thresholds[middleIndex].value - minNoConcernWidth;
+                threshold.value = Math.min(threshold.value, maxAllowedValue);
+                if (index > 0) {
+                    threshold.value = Math.max(thresholds[index - 1].value, threshold.value);
+                }
+            }
+            else if (index === middleIndex) {
+                const minAllowedValue = thresholds[middleIndex - 1].value + minNoConcernWidth;
+                threshold.value = Math.max(threshold.value, minAllowedValue);
+                if (index < thresholds.length - 1) {
+                    threshold.value = Math.min(thresholds[index + 1].value, threshold.value);
+                }
+            }
+        }
+        else {
+            if (index > 0) {
+                threshold.value = Math.max(thresholds[index - 1].value, threshold.value);
+            }
+            if (index < thresholds.length - 1) {
+                threshold.value = Math.min(thresholds[index + 1].value, threshold.value);
+            }
+        }
+    }
+}       function updatePositions() {
             thresholds.forEach((threshold, index) => {
                 if (index > 0 && index < thresholds.length - 1) {
                     const thumb = thumbs[index - 1];
@@ -630,55 +657,75 @@ if (submitButton) {
         table.appendChild(tableBody);
         container.appendChild(table);
 
-        function updateThresholdTable() {
-            tableBody.innerHTML = '';
-            const levels = getConcernLevels(vitalSign);
-            
-            // Create an array of sections with their boundaries
-            let sections = [];
-            for (let i = 1; i < thresholds.length; i++) {
-                const isNoConcern = levels[thresholds[i-1].levelIndex].label === "No concern";
-                const sectionWidth = thresholds[i].value - thresholds[i-1].value;
-                
-                // Only include sections that have non-zero width OR are "No concern"
-                if (sectionWidth > 0 || isNoConcern) {
-                    sections.push({
-                        level: levels[thresholds[i-1].levelIndex].label,
-                        lower: thresholds[i-1].value,
-                        upper: thresholds[i].value - 1,
-                        zeroWidth: sectionWidth === 0,
-                        isNoConcern: isNoConcern
-                    });
-                }
-            }
-            
-            // Render sections
-            sections.forEach((section, index) => {
-                const row = document.createElement('tr');
-                
-                const levelCell = document.createElement('td');
-                levelCell.textContent = section.level;
-               
-                const lowerCell = document.createElement('td');
-                lowerCell.textContent = formatValue(section.lower, vitalSign);
-                
-                const upperCell = document.createElement('td');
-                upperCell.textContent = formatValue(section.upper, vitalSign);
-                
-                // Only add visual indicator for zero-width "No concern" sections
-                if (section.zeroWidth && section.isNoConcern) {
-                    row.style.opacity = "0.7";
-                    row.title = "This category has minimal range but must remain visible";
-                }
-                
-                row.appendChild(levelCell);
-                row.appendChild(lowerCell);
-                row.appendChild(upperCell);
-                tableBody.appendChild(row);
+       function updateThresholdTable() {
+    tableBody.innerHTML = '';
+    const levels = getConcernLevels(vitalSign);
+    
+    // Create an array of sections with their boundaries
+    let sections = [];
+    for (let i = 1; i < thresholds.length; i++) {
+        const isNoConcern = levels[thresholds[i-1].levelIndex].label === "No concern";
+        const sectionWidth = thresholds[i].value - thresholds[i-1].value;
+        
+        // Calculate step size based on vital sign
+        const stepSize = vitalSign.step || 1;
+        
+        // Only include sections that have non-zero width OR are "No concern"
+        if (sectionWidth > 0 || isNoConcern) {
+            sections.push({
+                level: levels[thresholds[i-1].levelIndex].label,
+                lower: thresholds[i-1].value,
+                upper: thresholds[i].value,
+                zeroWidth: sectionWidth === 0,
+                isNoConcern: isNoConcern,
+                stepSize: stepSize
             });
         }
-
-        vitalSign.getValues = function() {
+    }
+    
+    // Adjust the upper values while respecting step sizes
+    for (let i = 0; i < sections.length; i++) {
+        const section = sections[i];
+        
+        if (i < sections.length - 1) {
+            // Calculate the next valid value below the next section's lower bound
+            const nextLower = sections[i + 1].lower;
+            const stepsToSubtract = 1;
+            section.upper = nextLower - (section.stepSize * stepsToSubtract);
+            
+            // Handle edge case where upper would be less than lower
+            if (section.upper < section.lower) {
+                section.upper = section.lower;
+            }
+        }
+        // The last section's upper value remains unchanged
+    }
+    
+    // Render sections
+    sections.forEach((section, index) => {
+        const row = document.createElement('tr');
+        
+        const levelCell = document.createElement('td');
+        levelCell.textContent = section.level;
+       
+        const lowerCell = document.createElement('td');
+        lowerCell.textContent = formatValue(section.lower, vitalSign);
+        
+        const upperCell = document.createElement('td');
+        upperCell.textContent = formatValue(section.upper, vitalSign);
+        
+        // Only add visual indicator for zero-width "No concern" sections
+        if (section.zeroWidth && section.isNoConcern) {
+            row.style.opacity = "0.7";
+            row.title = "This category has minimal range but must remain visible";
+        }
+        
+        row.appendChild(levelCell);
+        row.appendChild(lowerCell);
+        row.appendChild(upperCell);
+        tableBody.appendChild(row);
+    });
+}    vitalSign.getValues = function() {
             return thresholds.slice(1, -1)
                 .map(t => formatValue(t.value, vitalSign));
         };
