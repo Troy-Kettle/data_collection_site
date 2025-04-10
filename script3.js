@@ -271,4 +271,249 @@ scenarios.forEach((scenario, index) => {
     concernDiv.appendChild(descriptionsDiv);
 
     // Create slider container and components
-    const sliderContainer =
+    const sliderContainer = document.createElement('div');
+    sliderContainer.className = 'slider-container';
+
+    const sliderWrapper = document.createElement('div');
+    sliderWrapper.className = 'slider-wrapper';
+
+    const slider = document.createElement('input');
+    slider.type = 'range';
+    slider.min = '0';
+    slider.max = '15';
+    slider.value = '0';
+    slider.step = '1';
+    slider.id = `slider-${scenario.id}`;
+    slider.className = 'slider concern-slider';
+
+    const indicator = document.createElement('span');
+    indicator.className = 'completion-indicator';
+    indicator.textContent = '';
+    indicator.style.color = 'red';
+
+    sliderWrapper.appendChild(slider);
+    sliderWrapper.appendChild(indicator);
+    sliderContainer.appendChild(sliderWrapper);
+
+    // Create tick marks
+    function createTickMarks() {
+        const tickMarksContainer = document.createElement('div');
+        tickMarksContainer.className = 'tick-marks';
+    
+        const ticksContainer = document.createElement('div');
+        ticksContainer.className = 'ticks-container';
+    
+        for (let i = 0; i <= 15; i++) {
+            const tick = document.createElement('div');
+            tick.className = i % 5 === 0 ? 'tick major' : 'tick';
+            const position = (i / 15) * 100;
+            tick.style.left = `${position}%`;
+            ticksContainer.appendChild(tick);
+    
+            if (i % 5 === 0) {
+                const label = document.createElement('div');
+                label.className = 'tick-label';
+                label.textContent = i;
+                label.style.left = `${position}%`;
+                ticksContainer.appendChild(label);
+            }
+        }
+    
+        tickMarksContainer.appendChild(ticksContainer);
+        return tickMarksContainer;
+    }
+
+    sliderContainer.appendChild(createTickMarks());
+
+    const sliderValueDisplay = document.createElement('div');
+    sliderValueDisplay.className = 'slider-values';
+    sliderContainer.appendChild(sliderValueDisplay);
+
+    // Add slider event listener
+    slider.addEventListener('input', () => {
+        sliderInteractionTracker[index] = true;
+        
+        const indicator = slider.parentElement.querySelector('.completion-indicator');
+        indicator.textContent = '✓';
+        indicator.style.color = 'green';
+
+        const percentage = slider.value / 15;
+        const color = getGradientColor(percentage);
+        slider.style.setProperty('--thumb-color', color);
+
+        saveData();
+        updateSubmitButton();
+    });
+
+    concernDiv.appendChild(sliderContainer);
+    scenarioDiv.appendChild(concernDiv);
+    part3Container.appendChild(scenarioDiv);
+});
+
+// Add styles
+const style = document.createElement('style');
+style.textContent = `
+    .slider-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+        margin-bottom: 0px;
+        padding-top: 10px;
+        position: relative;
+    }
+
+    .completion-indicator {
+        position: absolute;
+        font-size: 1.2em;
+        font-weight: bold;
+        left: -30px;
+        top: 35px;
+        min-width: 24px;
+    }
+
+    .concern-slider {
+        width: 100%;
+        margin-bottom: 25px;
+    }
+    
+    .tick-marks {
+        position: relative;
+        height: 40px;
+        margin-top: -10px;
+    }
+
+    .ticks-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+    }
+
+    .tick {
+        position: absolute;
+        width: 1px;
+        height: 5px;
+        background-color: #888;
+        transform: translateX(-50%);
+    }
+
+    .tick.major {
+        height: 10px;
+        width: 2px;
+        background-color: #444;
+    }
+
+    .tick-label {
+        position: absolute;
+        font-size: 12px;
+        color: #666;
+        transform: translateX(-50%);
+        top: 15px;
+        text-align: center;
+    }
+
+    .concern-slider {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+`;
+document.head.appendChild(style);
+
+// Data collection and saving functions
+function collectData() {
+    const data = scenarios.map((scenario, index) => {
+        const slider = document.getElementById(`slider-${scenario.id}`);
+        return {
+            id: scenario.id,
+            concernLevel: slider ? parseInt(slider.value) : null,
+            userInteracted: sliderInteractionTracker[index] || false,
+        };
+    });
+
+    sessionStorage.setItem('part3Data', JSON.stringify(data));
+    return data;
+}
+
+function saveData() {
+    collectData();
+}
+
+function loadSavedData() {
+    const savedData = sessionStorage.getItem('part3Data');
+    if (savedData) {
+        const data = JSON.parse(savedData);
+        
+        data.forEach((item, index) => {
+            const slider = document.getElementById(`slider-${item.id}`);
+            if (slider) {
+                slider.value = item.concernLevel || 0;
+                
+                // Update the interaction tracker
+                sliderInteractionTracker[index] = item.userInteracted || false;
+                
+                // Update visual indicators
+                const indicator = slider.parentElement.querySelector('.completion-indicator');
+                if (item.userInteracted) {
+                    indicator.textContent = '✓';
+                    indicator.style.color = 'green';
+                } else {
+                    indicator.textContent = '';
+                    indicator.style.color = 'red';
+                }
+            }
+        });
+        
+        updateSubmitButton();
+    }
+}
+
+window.addEventListener('beforeunload', saveData);
+
+function saveDataToFirestore() {
+    const consentData = JSON.parse(sessionStorage.getItem('consentData')) || {};
+    const basicInfoData = JSON.parse(sessionStorage.getItem('basicInfoData')) || {};
+    const part1Data = JSON.parse(sessionStorage.getItem('part1Data')) || {};
+    const part2Data = JSON.parse(sessionStorage.getItem('part2Data')) || {};
+    const part3Data = JSON.parse(sessionStorage.getItem('part3Data')) || {};
+
+    const allData = {
+        consentData,
+        basicInfoData,
+        part1Data,
+        part2Data,
+        part3Data,
+        timestamp: new Date()
+    };
+
+    db.collection('vital_signs_survey').add(allData)
+        .then(docRef => {
+            console.log('Document written with ID: ', docRef.id);
+            sessionStorage.clear();
+            alert('Your responses have been saved. Thank you for completing the survey.');
+            window.location.href = 'index.html';
+        })
+        .catch(error => {
+            console.error('Error adding document: ', error);
+            alert('There was an error saving your data. Please try again.');
+        });
+}
+
+// Submit button event listener
+const submitButton = document.getElementById('submitButton');
+if (submitButton) {
+    submitButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        
+        const notInteractedCount = sliderInteractionTracker.filter(interacted => !interacted).length;
+        
+        if (notInteractedCount > 0) {
+            window.alert(`Please interact with all sliders before submitting. ${notInteractedCount} slider${notInteractedCount === 1 ? ' is' : 's are'} still not adjusted.`);
+            return;
+        }
+        
+        saveDataToFirestore();
+    });
+}
+
+// Load saved data when the page loads
+loadSavedData();
+});
