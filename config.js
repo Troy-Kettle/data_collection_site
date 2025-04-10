@@ -1,5 +1,5 @@
 // Firebase configuration
-const firebaseConfig = {
+const firebaseConfigData = {
     apiKey: "AIzaSyDUqolrnw7CQ-_bPWx0bbSPBEK4MNgkgmo",
     authDomain: "datacollection-9f8f6.firebaseapp.com",
     projectId: "datacollection-9f8f6",
@@ -9,7 +9,7 @@ const firebaseConfig = {
     measurementId: "G-F2WDNKDP5R"
 };
 
-// Export the configuration
-function getFirebaseConfig() {
-    return firebaseConfig;
-}
+// Export the configuration without redeclaring
+window.getFirebaseConfig = function() {
+    return firebaseConfigData;
+};
