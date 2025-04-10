@@ -14,11 +14,8 @@
     <script src="config.js"></script>
 
     <script>
-        // Get Firebase configuration from config.js
-        const firebaseConfig = getFirebaseConfig();
-          
-        // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
+        // Initialize Firebase using the config from config.js
+        const app = firebase.initializeApp(getFirebaseConfig());
         const db = firebase.firestore();
     </script>
 </head>
