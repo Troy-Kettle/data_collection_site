@@ -169,11 +169,8 @@
 </div>
 
 <script>
-    // Get Firebase configuration from config.js
-    const firebaseConfig = getFirebaseConfig();
-      
-    // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
+    // Initialize Firebase using the config from config.js
+    const app = firebase.initializeApp(getFirebaseConfig());
     const db = firebase.firestore();
 
     document.getElementById('consentForm').addEventListener('submit', function(event) {
@@ -214,8 +211,8 @@
             sessionStorage.setItem('consentData', JSON.stringify(consentData));
             sessionStorage.setItem('basicInfoData', JSON.stringify(basicInfoData));
     
-            // Redirect to next page
-            window.location.href = '/part1.html';
+            // Redirect to next page - removed leading slash to fix path issues
+            window.location.href = 'part1.html';
         } else {
             alert('Please complete all required fields before proceeding.');
         }
