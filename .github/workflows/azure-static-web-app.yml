@@ -1,4 +1,3 @@
-
 name: Build and Deploy to Azure Static Web Apps
 on:
   push:
@@ -15,6 +14,6 @@ jobs:
       with:
         azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
         repo_token: ${{ secrets.GITHUB_TOKEN }}
+        action: "upload"
         app_location: "/"  # Location of your app code - adjust as needed
         output_location: "/" # Build output directory, e.g., "dist" or "build" - adjust as needed
-
