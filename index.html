@@ -10,6 +10,42 @@
     <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-firestore-compat.js"></script>
     <!-- Load the config file -->
     <script src="config.js"></script>
+    
+    <style>
+        /* Additional styles to fix form dropdowns */
+        select {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0 20px 0;
+            display: block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        
+        fieldset {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        legend {
+            font-weight: bold;
+            padding: 0 10px;
+        }
+        
+        label {
+            display: block;
+            margin: 15px 0 5px 0;
+            font-weight: normal;
+        }
+        
+        input[type="checkbox"] {
+            margin-right: 10px;
+        }
+    </style>
 </head>
 <body>
     <div class="navbar">
@@ -50,8 +86,6 @@
     <h3>Who has reviewed the study?</h3>
     <p>All research in healthcare is looked at by an independent group of people, called a Research Ethics Committee, to protect your interests. This study has been reviewed and given a favourable opinion by the Nottingham 1 Research Ethics Committee. </p>
 
-
-
     <h3>Further information and contact details</h3>
     <p>If you would like further information about this study then you can contact the Chief Investigator:</p>
     <p><strong>Dr Sherif Gonem</strong><br>
@@ -90,7 +124,6 @@
                 <option value="yes">Yes</option>
                 <option value="no">No</option>
             </select>
-            <br>
 
             <label for="location">
                 Do you currently live and work in England or Wales?
@@ -100,22 +133,20 @@
                 <option value="yes">Yes</option>
                 <option value="no">No</option>
             </select>
-            <br>
 
             <label for="role">
                 Please indicate which best describes your role:
             </label>
             <select id="role" name="role" required>
                 <option value="">--Select your role--</option>
-                <option value="doctor">Registrar</option>
-                <option value="nurse">Consultant</option>
-                <option value="acp">Ward nurse</option>
+                <option value="registrar">Registrar</option>
+                <option value="consultant">Consultant</option>
+                <option value="ward_nurse">Ward nurse</option>
                 <option value="specialist_nurse">Specialist nurse</option>
                 <option value="cc_outreach_nurse">Critical Care Outreach Nurse</option>
-                <option value="ACP">Advanced clinical practitioner</option>
+                <option value="acp">Advanced clinical practitioner</option>
                 <option value="hhn_coordinator">Hospital at Night coordinator</option>
             </select>
-            <br>
 
             <label for="specialty">Please indicate which best describes the specialty in which you currently work:</label>
             <select id="specialty" name="specialty" required>
@@ -159,7 +190,6 @@
                 <option value="vascular_surgery">Vascular surgery</option>
                 <option value="other">Other</option>
             </select>
-            <br>
         </fieldset>
 
         <div class="navigation-buttons">
